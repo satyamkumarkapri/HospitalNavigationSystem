@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}Billing & Insurance | City General Hospital{% endblock %}
+
+{% block content %}
+<!-- HERO SECTION -->
+<section class="reveal" style="position: relative; padding: 8rem 2rem; background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.8)), url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=2011'); background-size: cover; background-position: center; color: white; text-align: center; overflow: hidden; border-bottom: 1px solid var(--glass-border);">
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at center, rgba(56, 189, 248, 0.1) 0%, transparent 70%); pointer-events: none;"></div>
+    <div style="max-width: 900px; margin: 0 auto; position: relative; z-index: 2;">
+        <span style="background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); padding: 0.5rem 1.2rem; border-radius: 50px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; border: 1px solid rgba(56, 189, 248, 0.3); margin-bottom: 1.5rem; display: inline-block;">Financial Transparency</span>
+        <h1 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Billing & Insurance Made Simple
+        </h1>
+        <p style="font-size: 1.2rem; color: #cbd5e1; max-width: 700px; margin: 0 auto 3rem; line-height: 1.6;">
+            We are committed to providing transparent pricing and assisting you with your financial questions throughout your care journey.
+        </p>
+    </div>
+</section>
+
+<!-- MAIN BILLING CONTENT -->
+<section style="padding: 5rem 2rem; background: var(--bg-dark);">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 3rem;">
+            
+            <!-- Online Bill Pay -->
+            <div class="reveal" style="background: var(--sidebar-bg); border: 1px solid var(--glass-border); padding: 3rem; border-radius: 24px; position: relative; overflow: hidden;">
+                <div style="width: 60px; height: 60px; background: rgba(56, 189, 248, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--accent-blue); margin-bottom: 2rem;">
+                    <i data-lucide="credit-card" size="32"></i>
+                </div>
+                <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem;">Online Bill Pay</h2>
+                <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 2.5rem;">
+                    Fast, secure, and convenient. Pay your hospital bills online using our encrypted payment gateway. We accept all major credit cards and digital wallets.
+                </p>
+                <button onclick="openModal('paymentModal')" class="primary-btn" style="width: 100%; text-decoration: none; display: inline-block; text-align: center;">Pay Your Bill Online</button>
+            </div>
+
+            <!-- Insurance Information -->
+            <div class="reveal" style="background: var(--sidebar-bg); border: 1px solid var(--glass-border); padding: 3rem; border-radius: 24px;">
+                <div style="width: 60px; height: 60px; background: rgba(74, 222, 128, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--accent-green); margin-bottom: 2rem;">
+                    <i data-lucide="shield-check" size="32"></i>
+                </div>
+                <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem;">Accepted Insurance</h2>
+                <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 2rem;">
+                    City General Hospital works with a wide range of insurance providers to ensure you get the coverage you need. 
+                </p>
+                <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 2.5rem;">
+                    <li style="display: flex; align-items: center; gap: 0.8rem; color: var(--text-primary); font-weight: 500;">
+                        <i data-lucide="check" size="18" style="color: var(--accent-green);"></i> BlueCross BlueShield
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 0.8rem; color: var(--text-primary); font-weight: 500;">
+                        <i data-lucide="check" size="18" style="color: var(--accent-green);"></i> Aetna & UnitedHealthcare
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 0.8rem; color: var(--text-primary); font-weight: 500;">
+                        <i data-lucide="check" size="18" style="color: var(--accent-green);"></i> Medicare & Medicaid
+                    </li>
+                </ul>
+                <button onclick="openModal('insuranceModal')" class="hero-cta-secondary" style="width: 100%; text-decoration: none; display: inline-block; text-align: center; border: 1px solid var(--glass-border); background: transparent; color: var(--text-primary); cursor: pointer; padding: 1rem; border-radius: 12px; font-weight: 600;">View Full List</button>
+            </div>
+
+        </div>
+
+        <!-- FINANCIAL ASSISTANCE -->
+        <div class="reveal" style="margin-top: 4rem; background: linear-gradient(to right, rgba(56, 189, 248, 0.05), rgba(99, 102, 241, 0.05)); border: 1px solid var(--glass-border); padding: 4rem; border-radius: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+            <div>
+                <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 1.5rem;">Financial Assistance</h2>
+                <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 2rem;">
+                    We believe everyone deserves access to high-quality healthcare. If you are uninsured or underinsured, we offer financial assistance programs and flexible payment plans based on eligibility.
+                </p>
+                <div style="display: flex; gap: 1.5rem;">
+                    <button onclick="openModal('assistanceModal')" class="primary-btn">Apply for Assistance</button>
+                    <button onclick="openModal('counselorModal')" class="hero-cta-secondary" style="border: 1px solid rgba(255,255,255,0.1); background: transparent; color: var(--text-primary); cursor: pointer; padding: 1rem 2rem; border-radius: 12px; font-weight: 600;">Speak with a Counselor</button>
+                </div>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.4); padding: 2rem; border-radius: 20px; border: 1px solid var(--glass-border);">
+                <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--accent-blue);">Common Questions</h3>
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div>
+                        <strong style="display: block; margin-bottom: 0.4rem; color: var(--text-primary);">When will I receive my bill?</strong>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Bills are typically sent 7-10 business days after insurance processing is complete.</p>
+                    </div>
+                    <div>
+                        <strong style="display: block; margin-bottom: 0.4rem; color: var(--text-primary);">What if I have multiple bills?</strong>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">You may receive separate bills for hospital services and physician services.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- MODALS -->
+
+<!-- Payment Modal -->
+<div id="paymentModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>Online Bill Payment</h3>
+            <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="paymentForm" onsubmit="event.preventDefault(); alert('Payment simulation successful!'); closeModal('paymentModal');">
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">Patient Account Number</label>
+                    <input type="text" required placeholder="e.g. 123456789" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: white;">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">Amount to Pay ($)</label>
+                    <input type="number" required placeholder="0.00" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: white;">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">Card Details</label>
+                    <input type="text" required placeholder="Card Number" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: white; margin-bottom: 0.5rem;">
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" required placeholder="MM/YY" style="flex: 1; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: white;">
+                        <input type="text" required placeholder="CVV" style="flex: 1; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: white;">
+                    </div>
+                </div>
+                <button type="submit" class="primary-btn" style="width: 100%;">Complete Payment</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Insurance Modal -->
+<div id="insuranceModal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 800px;">
+        <div class="modal-header">
+            <h3>Complete Insurance List</h3>
+            <button class="modal-close" onclick="closeModal('insuranceModal')">&times;</button>
+        </div>
+        <div class="modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <div>
+                <h4 style="color: var(--accent-blue); margin-bottom: 1rem;">Major Providers</h4>
+                <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                    <li style="margin-bottom: 0.5rem;">• Aetna</li>
+                    <li style="margin-bottom: 0.5rem;">• Blue Cross Blue Shield</li>
+                    <li style="margin-bottom: 0.5rem;">• Cigna</li>
+                    <li style="margin-bottom: 0.5rem;">• Humana</li>
+                    <li style="margin-bottom: 0.5rem;">• UnitedHealthcare</li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: var(--accent-green); margin-bottom: 1rem;">Government & Local</h4>
+                <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                    <li style="margin-bottom: 0.5rem;">• Medicare</li>
+                    <li style="margin-bottom: 0.5rem;">• Medicaid</li>
+                    <li style="margin-bottom: 0.5rem;">• TRICARE</li>
+                    <li style="margin-bottom: 0.5rem;">• CityHealth Plan</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assistance Modal -->
+<div id="assistanceModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>Financial Assistance Application</h3>
+            <button class="modal-close" onclick="closeModal('assistanceModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Please provide your basic information to start the eligibility assessment.</p>
+            <form onsubmit="event.preventDefault(); alert('Application submitted! Our team will contact you within 48 hours.'); closeModal('assistanceModal');">
+                <input type="text" required placeholder="Full Name" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: white; margin-bottom: 1rem;">
+                <input type="email" required placeholder="Email Address" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: white; margin-bottom: 1rem;">
+                <textarea placeholder="Describe your situation (optional)" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: white; margin-bottom: 1.5rem; height: 100px;"></textarea>
+                <button type="submit" class="primary-btn" style="width: 100%;">Submit Application</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Counselor Modal -->
+<div id="counselorModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>Schedule a Consultation</h3>
+            <button class="modal-close" onclick="closeModal('counselorModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Talk to our financial experts about your bills or insurance coverage.</p>
+            <div style="display: grid; gap: 1rem;">
+                <button class="hero-cta-secondary" style="background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent-blue); color: white; padding: 1rem; border-radius: 12px; cursor: pointer;" onclick="alert('Phone consultation scheduled!'); closeModal('counselorModal');">Request Phone Call</button>
+                <button class="hero-cta-secondary" style="background: rgba(74, 222, 128, 0.1); border: 1px solid var(--accent-green); color: white; padding: 1rem; border-radius: 12px; cursor: pointer;" onclick="alert('In-person meeting scheduled!'); closeModal('counselorModal');">Schedule In-Person Meeting</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    function openModal(id) {
+        document.getElementById(id).style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    window.onclick = function(event) {
+        if (event.target.className === 'modal-overlay') {
+            event.target.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+</script>
+{% endblock %}

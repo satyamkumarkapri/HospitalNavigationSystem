@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="about-section" style="padding: 4rem 2rem; min-height: 80vh; background: radial-gradient(circle at top left, rgba(74, 222, 128, 0.08), transparent);">
+    <div style="max-width: 900px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 4rem;">
+            <h1 class="section-title" data-i18n="utility_volunteer" style="margin-bottom: 1rem; background: linear-gradient(to right, var(--text-primary), var(--accent-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Become a Volunteer</h1>
+            <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Join our compassionate team and help patients navigate their journey to health. Your time can make a world of difference.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 3rem;">
+            <!-- Info Side -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <div style="background: var(--sidebar-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: 2rem; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+                    <h3 style="color: var(--accent-green); margin-bottom: 1rem; font-size: 1.2rem;">Why Volunteer?</h3>
+                    <ul style="color: var(--text-secondary); list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem; font-size: 0.95rem;">
+                        <li style="display: flex; gap: 0.8rem;"><span>🌟</span> Gain experience in a healthcare environment.</li>
+                        <li style="display: flex; gap: 0.8rem;"><span>🤝</span> Meet new people and build lasting connections.</li>
+                        <li style="display: flex; gap: 0.8rem;"><span>💝</span> Give back to your local community.</li>
+                        <li style="display: flex; gap: 0.8rem;"><span>📜</span> Receive certification for your service hours.</li>
+                    </ul>
+                </div>
+
+                <div style="background: var(--sidebar-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: 2rem; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">🙋‍♂️🙋‍♀️</div>
+                    <h4 style="margin-bottom: 0.5rem; color: var(--text-primary);">Need help?</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem;">Contact the Volunteer Office at (555) 012-3456 or volunteers@citygeneral.com</p>
+                </div>
+            </div>
+
+            <!-- Form Side -->
+            <div style="background: var(--sidebar-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: 3rem; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+                <form id="volunteer-form" onsubmit="handleVolunteer(event)">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="control-group">
+                            <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">First Name</label>
+                            <input type="text" placeholder="John" style="width: 100%; padding: 0.9rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-primary);" required>
+                        </div>
+                        <div class="control-group">
+                            <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Last Name</label>
+                            <input type="text" placeholder="Doe" style="width: 100%; padding: 0.9rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-primary);" required>
+                        </div>
+                    </div>
+
+                    <div class="control-group" style="margin-bottom: 1.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Email Address</label>
+                        <input type="email" placeholder="satyam.kapri@example.com" style="width: 100%; padding: 0.9rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-primary);" required>
+                    </div>
+
+                    <div class="control-group" style="margin-bottom: 1.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Area of Interest</label>
+                        <select style="width: 100%; padding: 0.9rem; border-radius: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: var(--text-primary); cursor: pointer;" required>
+                            <option value="">Select an area</option>
+                            <option value="Navigation">Patient Navigation & Guidance</option>
+                            <option value="Admin">Administrative Support</option>
+                            <option value="GiftShop">Gift Shop & Amenities</option>
+                            <option value="Companion">Patient Companionship</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group" style="margin-bottom: 2rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Why do you want to volunteer?</label>
+                        <textarea placeholder="Tell us a bit about yourself..." style="width: 100%; padding: 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-primary); min-height: 120px; resize: vertical;"></textarea>
+                    </div>
+
+                    <button type="submit" class="hero-cta-btn" style="width: 100%; border: none; cursor: pointer; padding: 1.1rem; font-size: 1rem; font-weight: 700; background: linear-gradient(135deg, var(--accent-green), #059669); box-shadow: 0 10px 20px rgba(74, 222, 128, 0.2);">Submit Application</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function handleVolunteer(e) {
+    e.preventDefault();
+    alert('Thank you for your interest! Your application has been submitted and our team will contact you within 3-5 business days.');
+    window.location.href = '/';
+}
+</script>
+{% endblock %}

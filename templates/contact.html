@@ -1,0 +1,648 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="contact-page-container" style="position: relative; overflow: hidden; min-height: 100vh;">
+    <!-- Animated Background Glows -->
+    <div class="contact-bg-glow glow-1"></div>
+    <div class="contact-bg-glow glow-2"></div>
+    
+    <!-- Hero Section -->
+    <div class="contact-hero">
+        <img src="/static/images/hospital_support_contact_bg_1777662675108.png" class="contact-hero-bg">
+        <div class="contact-hero-overlay"></div>
+        <div class="contact-hero-content">
+            <div class="hero-badge">24/7 Global Clinical Support</div>
+            <h1 class="hero-title">Institutional <span class="gradient-text">Support</span> Center</h1>
+            <p class="hero-subtitle">Seamlessly connecting patients with clinical excellence through AI-integrated communication channels.</p>
+        </div>
+    </div>
+
+    <div class="contact-grid-wrapper">
+        <!-- Left: Quick Info Sidebar -->
+        <aside class="contact-sidebar">
+            <div class="contact-glass-card sidebar-card">
+                <div class="info-group">
+                    <div class="info-icon bg-blue">📍</div>
+                    <div class="info-text">
+                        <h3>Main Campus</h3>
+                        <p>123 Health Innovation Boulevard<br>Medical District, South Wing<br>Cityville, ST 12345</p>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="info-group">
+                    <div class="info-icon bg-green">📞</div>
+                    <div class="info-text">
+                        <h3>Emergency Lines</h3>
+                        <div class="phone-line">
+                            <span>Clinical Support</span>
+                            <strong>(555) 123-4567</strong>
+                        </div>
+                        <div class="phone-line">
+                            <span>Appointments</span>
+                            <strong>(555) 123-4580</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="info-group">
+                    <div class="info-icon bg-purple">📧</div>
+                    <div class="info-text">
+                        <h3>Digital Portal</h3>
+                        <p class="email-text">institutional@citygeneral.ai</p>
+                    </div>
+                </div>
+
+                <div class="ai-tip-box">
+                    <p><span class="ai-label">AI TIP:</span> Use our <a href="/navigation" class="ai-link">Smart Navigator</a> to find specific departments instantly.</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right: Interactive Communication Form -->
+        <main class="contact-form-area">
+            <div class="contact-glass-card form-card">
+                <div class="form-header">
+                    <h2>Send Priority <span style="color: var(--accent-blue);">Message</span></h2>
+                    <p>Your message will be triaged by our intelligent response system and routed to the appropriate clinical department.</p>
+                </div>
+
+                <form id="contact-form" onsubmit="handleContact(event)">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" placeholder="Satyam Kr  Kapri" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Clinical Email</label>
+                            <input type="email" placeholder="satyam.kapri@example.com" required>
+                        </div>
+                        <div class="input-group full-width">
+                            <label>Subject / Department</label>
+                            <div class="select-wrapper">
+                                <select>
+                                    <option value="general">General Inquiry</option>
+                                    <option value="appointments">Appointment Rescheduling</option>
+                                    <option value="emergency">Emergency Response Feedback</option>
+                                    <option value="records">Medical Records Request</option>
+                                    <option value="billing">Billing & Insurance</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group full-width">
+                            <label>Message Details</label>
+                            <textarea placeholder="Please describe your inquiry in detail..." required rows="5"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-footer">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="urgent">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-label">Flag as Clinical Priority</span>
+                        </label>
+                        <button type="submit" class="hero-cta-main submit-btn">
+                            Deploy Message ⚡
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Success State -->
+                <div id="contact-success" class="success-state hidden">
+                    <div class="success-icon">
+                        <span>✅</span>
+                    </div>
+                    <h2>Transmission Successful</h2>
+                    <p>Your message has been encrypted and routed to our central clinical response team. Estimated triage time: <span class="highlight">&lt; 15 mins</span>.</p>
+                    <button onclick="location.reload()" class="reset-btn">Send Another Message</button>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+function handleContact(e) {
+    e.preventDefault();
+    const form = document.getElementById('contact-form');
+    const success = document.getElementById('contact-success');
+    
+    form.style.opacity = '0';
+    form.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+        form.style.display = 'none';
+        success.classList.remove('hidden');
+        setTimeout(() => {
+            success.classList.add('visible');
+        }, 50);
+    }, 400);
+}
+</script>
+
+<style>
+/* Base Setup & Animations */
+.contact-page-container {
+    background: var(--bg-color);
+}
+.contact-bg-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+    animation: float-glow 20s ease-in-out infinite alternate;
+}
+.glow-1 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.2), transparent 70%);
+    top: -200px;
+    right: -100px;
+}
+.glow-2 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.15), transparent 70%);
+    bottom: 100px;
+    left: -150px;
+    animation-delay: -10s;
+}
+
+@keyframes float-glow {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(-100px, 100px) scale(1.2); }
+}
+
+/* Hero Section */
+.contact-hero {
+    height: 550px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.contact-hero-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.4) saturate(1.2) contrast(1.1) blur(2px);
+    transform: scale(1.1);
+    animation: slow-zoom 25s linear infinite alternate;
+}
+@keyframes slow-zoom {
+    from { transform: scale(1.1); }
+    to { transform: scale(1.25); }
+}
+.contact-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent, var(--bg-color) 95%);
+}
+.contact-hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 900px;
+    padding: 2rem;
+    margin-bottom: 80px;
+}
+.hero-badge {
+    display: inline-block;
+    padding: 0.6rem 2rem;
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 100px;
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.2);
+}
+.hero-title {
+    font-size: 5rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 10px 40px rgba(0,0,0,0.8);
+}
+.gradient-text {
+    background: linear-gradient(135deg, #38bdf8, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    position: relative;
+}
+.hero-subtitle {
+    color: #e2e8f0;
+    font-size: 1.4rem;
+    line-height: 1.6;
+    font-weight: 500;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Grid Layout */
+.contact-grid-wrapper {
+    max-width: 1400px;
+    margin: -100px auto 100px;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 3rem;
+}
+
+@media (max-width: 1024px) {
+    .contact-grid-wrapper {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Glass Cards */
+.contact-glass-card {
+    background: var(--sidebar-bg);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.contact-glass-card:hover {
+    box-shadow: 0 50px 120px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+/* Sidebar Styling */
+.sidebar-card {
+    padding: 3rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+.info-group {
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
+    transition: transform 0.2s ease;
+}
+.info-group:hover {
+    transform: translateX(5px);
+}
+.info-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.1);
+}
+.bg-blue { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.2); }
+.bg-green { background: rgba(74, 222, 128, 0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+.bg-purple { background: rgba(167, 139, 250, 0.15); color: #a855f7; border: 1px solid rgba(167,139,250,0.2); }
+
+.info-text h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+.info-text p {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+.phone-line {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-bottom: 0.8rem;
+}
+.phone-line span {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+.phone-line strong {
+    color: var(--text-primary);
+    font-family: 'Inter', monospace;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+.email-text {
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+}
+
+.divider {
+    height: 1px;
+    background: var(--glass-border);
+    width: 100%;
+}
+
+.ai-tip-box {
+    margin-top: auto;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(167, 139, 250, 0.05));
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    border-radius: 20px;
+    text-align: center;
+}
+.ai-tip-box p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+.ai-label {
+    color: var(--accent-blue);
+    font-weight: 900;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.ai-link {
+    color: var(--text-primary);
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 2px solid var(--accent-blue);
+    transition: color 0.2s ease;
+}
+.ai-link:hover {
+    color: var(--accent-blue);
+}
+
+/* Form Area */
+.form-card {
+    padding: 4rem;
+}
+.form-header {
+    margin-bottom: 3.5rem;
+}
+.form-header h2 {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    letter-spacing: -1px;
+    margin-bottom: 1rem;
+}
+.form-header p {
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+    max-width: 600px;
+    line-height: 1.6;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+.full-width {
+    grid-column: span 2;
+}
+@media (max-width: 768px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .full-width { grid-column: span 1; }
+    .form-card { padding: 2.5rem; }
+    .hero-title { font-size: 3.5rem; }
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.input-group input, .input-group textarea, .input-group select {
+    width: 100%;
+    padding: 1.2rem 1.5rem;
+    background: rgba(0,0,0,0.15);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    color: var(--text-primary);
+    font-size: 1.05rem;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+    font-family: inherit;
+}
+body.light-theme .input-group input, 
+body.light-theme .input-group textarea, 
+body.light-theme .input-group select {
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+    border-color: rgba(56, 189, 248, 0.5);
+    background: rgba(0,0,0,0.25);
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1), inset 0 2px 5px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
+}
+body.light-theme .input-group input:focus, 
+body.light-theme .input-group textarea:focus, 
+body.light-theme .input-group select:focus {
+    background: #fff;
+}
+
+.input-group textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+.select-wrapper {
+    position: relative;
+}
+.select-wrapper::after {
+    content: "▼";
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+.select-wrapper select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 3rem;
+    cursor: pointer;
+}
+
+/* Custom Checkbox */
+.form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 3rem;
+    grid-column: span 2;
+}
+@media (max-width: 600px) {
+    .form-footer {
+        flex-direction: column;
+        gap: 2rem;
+        align-items: flex-start;
+    }
+}
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    position: relative;
+    padding-left: 35px;
+    user-select: none;
+}
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+.checkmark {
+    position: absolute;
+    left: 0;
+    height: 24px;
+    width: 24px;
+    background-color: rgba(0,0,0,0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+.checkbox-container:hover input ~ .checkmark {
+    background-color: rgba(0,0,0,0.3);
+}
+.checkbox-container input:checked ~ .checkmark {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+.checkbox-container .checkmark:after {
+    left: 8px;
+    top: 4px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+.checkbox-label {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.submit-btn {
+    padding: 1.2rem 3rem;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 800;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3);
+}
+.submit-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 30px rgba(56, 189, 248, 0.4);
+}
+
+/* Success State */
+#contact-form {
+    transition: all 0.4s ease;
+}
+.success-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    opacity: 0;
+    transform: translateY(20px);
+}
+.success-state.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.hidden {
+    display: none !important;
+}
+.success-icon {
+    width: 120px;
+    height: 120px;
+    background: rgba(74, 222, 128, 0.1);
+    border: 3px solid var(--accent-green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2.5rem;
+    animation: pulse-green 2s infinite;
+    font-size: 3.5rem;
+    box-shadow: inset 0 0 20px rgba(74, 222, 128, 0.2);
+}
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5); }
+    70% { box-shadow: 0 0 0 25px rgba(74, 222, 128, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+}
+.success-state h2 {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin-bottom: 1.2rem;
+}
+.success-state p {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    line-height: 1.6;
+    max-width: 500px;
+    margin: 0 auto;
+}
+.highlight {
+    color: var(--accent-green);
+    font-weight: 800;
+}
+.reset-btn {
+    margin-top: 3rem;
+    background: transparent;
+    border: 2px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 1rem 2.5rem;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.reset-btn:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: var(--text-primary);
+}
+</style>
+{% endblock %}

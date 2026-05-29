@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Research & Clinical Trials | City General Hospital{% endblock %}
+
+{% block content %}
+<!-- HERO SECTION -->
+<section class="reveal" style="position: relative; padding: 8rem 2rem; background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.8)), url('https://images.unsplash.com/photo-1581093588401-fbb62a02f120?auto=format&fit=crop&q=80&w=2070'); background-size: cover; background-position: center; color: white; text-align: center; overflow: hidden; border-bottom: 1px solid var(--glass-border);">
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at center, rgba(56, 189, 248, 0.1) 0%, transparent 70%); pointer-events: none;"></div>
+    <div style="max-width: 900px; margin: 0 auto; position: relative; z-index: 2;">
+        <span style="background: rgba(167, 139, 250, 0.15); color: #a78bfa; padding: 0.5rem 1.2rem; border-radius: 50px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; border: 1px solid rgba(167, 139, 250, 0.3); margin-bottom: 1.5rem; display: inline-block;">Pioneering Future Medicine</span>
+        <h1 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; background: linear-gradient(to right, #fff, #c4b5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Research & Clinical Trials
+        </h1>
+        <p style="font-size: 1.2rem; color: #cbd5e1; max-width: 700px; margin: 0 auto 3rem; line-height: 1.6;">
+            Advancing the boundaries of medical science through innovative research and life-changing clinical trials.
+        </p>
+    </div>
+</section>
+
+<!-- RESEARCH AREAS -->
+<section style="padding: 5rem 2rem; background: var(--bg-dark);">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        
+        <div style="text-align: center; margin-bottom: 5rem;">
+            <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1.2rem;">Our Research Impact</h2>
+            <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">Connecting laboratory discoveries to bedside care through rigorous scientific inquiry.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            
+            <!-- Oncology Research -->
+            <div class="reveal" style="background: var(--sidebar-bg); border: 1px solid var(--glass-border); border-radius: 24px; padding: 2.5rem; transition: transform 0.3s ease;">
+                <div style="width: 50px; height: 50px; background: rgba(167, 139, 250, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #a78bfa; margin-bottom: 2rem;">
+                    <i data-lucide="microscope" size="28"></i>
+                </div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Precision Oncology</h3>
+                <p style="color: var(--text-secondary); line-height: 1.7; font-size: 0.95rem;">
+                    Developing targeted therapies based on genomic profiling to treat cancer with unprecedented accuracy.
+                </p>
+            </div>
+
+            <!-- Neuro Research -->
+            <div class="reveal" style="background: var(--sidebar-bg); border: 1px solid var(--glass-border); border-radius: 24px; padding: 2.5rem;">
+                <div style="width: 50px; height: 50px; background: rgba(56, 189, 248, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--accent-blue); margin-bottom: 2rem;">
+                    <i data-lucide="brain" size="28"></i>
+                </div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Neuro-Innovation</h3>
+                <p style="color: var(--text-secondary); line-height: 1.7; font-size: 0.95rem;">
+                    Exploring the frontiers of brain-computer interfaces and regenerative treatments for neurological disorders.
+                </p>
+            </div>
+
+            <!-- AI in Health -->
+            <div class="reveal" style="background: var(--sidebar-bg); border: 1px solid var(--glass-border); border-radius: 24px; padding: 2.5rem;">
+                <div style="width: 50px; height: 50px; background: rgba(74, 222, 128, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--accent-green); margin-bottom: 2rem;">
+                    <i data-lucide="cpu" size="28"></i>
+                </div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">AI-Driven Diagnostics</h3>
+                <p style="color: var(--text-secondary); line-height: 1.7; font-size: 0.95rem;">
+                    Utilizing advanced machine learning models to detect diseases earlier and predict patient outcomes.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- CURRENT TRIALS -->
+        <div class="reveal" style="margin-top: 6rem;">
+            <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.5)); border: 1px solid var(--glass-border); border-radius: 30px; padding: 4rem;">
+                <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 3rem; text-align: center;">Active Clinical Trials</h2>
+                
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); padding: 2rem; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+                        <div>
+                            <span style="font-size: 0.75rem; color: var(--accent-blue); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Phase III Trial</span>
+                            <h4 style="font-size: 1.2rem; font-weight: 600; margin-top: 0.5rem;">Advanced Immunotherapy for Solid Tumors</h4>
+                        </div>
+                        <button onclick="openModal('eligibilityModal')" class="hero-cta-secondary" style="padding: 0.8rem 1.5rem; border-radius: 8px; border: 1px solid var(--accent-blue); color: var(--accent-blue); background: transparent; cursor: pointer;">Eligibility Check</button>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); padding: 2rem; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+                        <div>
+                            <span style="font-size: 0.75rem; color: var(--accent-green); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Observational Study</span>
+                            <h4 style="font-size: 1.2rem; font-weight: 600; margin-top: 0.5rem;">Long-term Impact of AI-Assisted Rehabilitation</h4>
+                        </div>
+                        <button onclick="openModal('learnMoreModal')" class="hero-cta-secondary" style="padding: 0.8rem 1.5rem; border-radius: 8px; border: 1px solid var(--accent-green); color: var(--accent-green); background: transparent; cursor: pointer;">Learn More</button>
+                    </div>
+                </div>
+
+                <div style="margin-top: 3rem; text-align: center;">
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Interested in participating or collaborating?</p>
+                    <a href="{{ url_for('contact') }}" class="primary-btn" style="text-decoration: none; display: inline-block;">Contact Research Office</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- MODALS -->
+
+<!-- Eligibility Modal -->
+<div id="eligibilityModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>Trial Eligibility Check</h3>
+            <button class="modal-close" onclick="closeModal('eligibilityModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Quick assessment for 'Advanced Immunotherapy' trial.</p>
+            <form onsubmit="event.preventDefault(); alert('Assessment complete! You appear to be eligible. Our clinical coordinator will reach out.'); closeModal('eligibilityModal');">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">Age Range</label>
+                    <select style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: white;">
+                        <option>18-45</option>
+                        <option>46-65</option>
+                        <option>65+</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">Have you received prior immunotherapy?</label>
+                    <div style="display: flex; gap: 1rem;">
+                        <label><input type="radio" name="prior" value="yes"> Yes</label>
+                        <label><input type="radio" name="prior" value="no"> No</label>
+                    </div>
+                </div>
+                <button type="submit" class="primary-btn" style="width: 100%; background: var(--accent-blue);">Submit Assessment</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Learn More Modal -->
+<div id="learnMoreModal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3>Study Details: AI-Assisted Rehab</h3>
+            <button class="modal-close" onclick="closeModal('learnMoreModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="color: var(--text-secondary); line-height: 1.6;">
+                <h4 style="color: var(--accent-green); margin-bottom: 1rem;">Objectives</h4>
+                <p style="margin-bottom: 1.5rem;">To evaluate the efficacy of AI-driven gait analysis and robotic exoskeletons in improving mobility for post-stroke patients over a 24-month period.</p>
+                
+                <h4 style="color: var(--accent-green); margin-bottom: 1rem;">Requirements</h4>
+                <ul>
+                    <li>Participate in bi-weekly assessment sessions.</li>
+                    <li>Willingness to use wearable sensor technology.</li>
+                    <li>No conflicting major surgeries planned in next 6 months.</li>
+                </ul>
+            </div>
+            <button class="primary-btn" style="width: 100%; margin-top: 2rem; background: var(--accent-green);" onclick="closeModal('learnMoreModal')">Close Details</button>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    function openModal(id) {
+        document.getElementById(id).style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    window.onclick = function(event) {
+        if (event.target.className === 'modal-overlay') {
+            event.target.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+</script>
+{% endblock %}

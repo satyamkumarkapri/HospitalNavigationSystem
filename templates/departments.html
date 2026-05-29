@@ -1,0 +1,802 @@
+{% extends 'base.html' %}
+
+{% block title %}Departments | City General Hospital{% endblock %}
+
+{% block head %}
+
+<style>
+    .dept-hero {
+        padding: 10rem 2rem 8rem;
+        background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.1), transparent),
+                    radial-gradient(circle at bottom left, rgba(99, 102, 241, 0.05), transparent);
+        text-align: center;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .dept-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        background: linear-gradient(to right, var(--text-primary), var(--accent-blue));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.02em;
+    }
+
+    .dept-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.25rem;
+        max-width: 700px;
+        margin: 0 auto 5rem;
+        line-height: 1.6;
+    }
+
+    .search-container {
+        max-width: 600px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .dept-search {
+        width: 100%;
+        padding: 1.25rem 1.5rem 1.25rem 3.5rem;
+        background: var(--sidebar-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 50px;
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .dept-search:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+        box-shadow: 0 10px 40px rgba(56, 189, 248, 0.2);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        pointer-events: none;
+    }
+
+    .dept-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2.5rem;
+        padding: 4rem 2rem;
+        max-width: 1300px;
+        margin: 0 auto;
+    }
+
+    .dept-card {
+        position: relative;
+        height: 450px;
+        border-radius: 24px;
+        overflow: hidden;
+        background: var(--sidebar-bg);
+        border: 1px solid var(--glass-border);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    .dept-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        border-color: var(--accent-blue);
+    }
+
+    .dept-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 0;
+        transition: transform 0.7s ease;
+        filter: brightness(0.7);
+    }
+
+    .dept-card:hover .dept-image {
+        transform: scale(1.1);
+        filter: brightness(0.5);
+    }
+
+    .dept-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.4) 50%, transparent 100%);
+        z-index: 1;
+    }
+
+    .dept-content {
+        position: relative;
+        z-index: 2;
+        padding: 2rem;
+        transform: translateY(20px);
+        transition: transform 0.5s ease;
+    }
+
+    .dept-card:hover .dept-content {
+        transform: translateY(0);
+    }
+
+    .dept-icon-wrapper {
+        width: 56px;
+        height: 56px;
+        background: rgba(56, 189, 248, 0.15);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        color: var(--accent-blue);
+        backdrop-filter: blur(5px);
+        transition: all 0.3s ease;
+    }
+
+    .dept-card:hover .dept-icon-wrapper {
+        background: var(--accent-blue);
+        color: white;
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .dept-name {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        color: white;
+    }
+
+    .dept-desc {
+        color: #f1f5f9;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .dept-card:hover .dept-desc {
+        -webkit-line-clamp: 4;
+    }
+
+    .dept-meta {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.4s ease 0.1s;
+    }
+
+    .dept-card:hover .dept-meta {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--accent-blue);
+        font-weight: 600;
+    }
+
+    .dept-action {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 12px;
+        border: none;
+        background: var(--accent-blue);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.4s ease 0.2s;
+    }
+
+    .dept-card:hover .dept-action {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .dept-action:hover {
+        background: #0ea5e9;
+        transform: scale(1.02);
+    }
+
+    .featured-stats {
+        padding: 2.5rem 2rem;
+        background: var(--sidebar-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        max-width: 1100px;
+        margin: 4rem auto;
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        z-index: 10;
+        position: relative;
+    }
+
+    .stats-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-around;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-box {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--accent-blue);
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .dept-title { font-size: 2.5rem; }
+        .dept-grid { grid-template-columns: 1fr; }
+        .dept-card { height: 400px; }
+    }
+
+    /* Light Theme Adjustments */
+    body.light-theme .dept-overlay {
+        background: linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+    }
+    body.light-theme .dept-name { color: var(--text-primary); }
+    body.light-theme .dept-desc { 
+        color: #0f172a; 
+        font-weight: 500;
+        text-shadow: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="dept-hero">
+    <div class="container">
+        <h1 class="dept-title">Expert Care for Every Need</h1>
+        <p class="dept-subtitle">
+            Our specialized departments combine cutting-edge AI technology with world-renowned medical expertise to provide personalized, compassionate care for you and your family.
+        </p>
+        
+        <div class="search-container">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" class="dept-search" placeholder="Search by department, specialty, or condition..." id="deptSearch">
+        </div>
+    </div>
+</section>
+
+
+<section class="dept-grid-section">
+    <div class="dept-grid" id="deptGrid">
+        <!-- Emergency -->
+        <div class="dept-card" data-name="emergency department er trauma">
+            <img src="{{ url_for('static', filename='images/emergency_dept.png') }}" alt="Emergency Department" class="dept-image">
+            <div class="dept-overlay"></div>
+            <div class="dept-content">
+                <div class="dept-icon-wrapper">
+                    <i data-lucide="flame-kindling"></i>
+                </div>
+                <h3 class="dept-name">Emergency (ER)</h3>
+                <p class="dept-desc">Rapid-response care for critical conditions, accidents, and life-threatening emergencies. Our Level I Trauma Center is equipped with AI-integrated triage systems.</p>
+                <div class="dept-meta">
+                    <div class="meta-item"><i data-lucide="map-pin" size="16"></i> <span>Floor 1, North Wing</span></div>
+                    <div class="meta-item"><i data-lucide="star" size="16" style="color: #facc15; fill: #facc15;"></i> <span>4.9/5</span></div>
+                </div>
+                <a href="{{ url_for('navigation', target='ER') }}" class="dept-action">
+                    <i data-lucide="phone"></i> Get Immediate Help
+                </a>
+            </div>
+        </div>
+
+        <!-- Cardiology -->
+        <div class="dept-card" data-name="cardiology heart cardiovascular">
+            <img src="{{ url_for('static', filename='images/cardiology_dept.png') }}" alt="Cardiology" class="dept-image">
+            <div class="dept-overlay"></div>
+            <div class="dept-content">
+                <div class="dept-icon-wrapper">
+                    <i data-lucide="activity"></i>
+                </div>
+                <h3 class="dept-name">Cardiology</h3>
+                <p class="dept-desc">Comprehensive heart health services, from preventative screenings to complex cardiovascular surgeries and rehabilitation programs.</p>
+                <div class="dept-meta">
+                    <div class="meta-item"><i data-lucide="map-pin" size="16"></i> <span>Floor 3, Cardiac Center</span></div>
+                    <div class="meta-item"><i data-lucide="star" size="16" style="color: #facc15; fill: #facc15;"></i> <span>4.8/5</span></div>
+                </div>
+                <a href="{{ url_for('appointments') }}?dept=Cardiology" class="dept-action">
+                    <i data-lucide="calendar"></i> Book Appointment
+                </a>
+            </div>
+        </div>
+
+        <!-- Maternity -->
+        <div class="dept-card" data-name="maternity pediatrics baby newborn">
+            <img src="{{ url_for('static', filename='images/maternity_dept.png') }}" alt="Maternity" class="dept-image">
+            <div class="dept-overlay"></div>
+            <div class="dept-content">
+                <div class="dept-icon-wrapper">
+                    <i data-lucide="baby"></i>
+                </div>
+                <h3 class="dept-name">Maternity & Pediatrics</h3>
+                <p class="dept-desc">Supporting growing families with compassionate prenatal care, state-of-the-art delivery suites, and specialized pediatric monitoring.</p>
+                <div class="dept-meta">
+                    <div class="meta-item"><i data-lucide="map-pin" size="16"></i> <span>Floor 2, South Wing</span></div>
+                    <div class="meta-item"><i data-lucide="star" size="16" style="color: #facc15; fill: #facc15;"></i> <span>5.0/5</span></div>
+                </div>
+                <a href="{{ url_for('appointments') }}?dept=Pediatrics" class="dept-action">
+                    <i data-lucide="info"></i> View Care Packages
+                </a>
+            </div>
+        </div>
+
+        <!-- Radiology -->
+        <div class="dept-card" data-name="radiology imaging mri ct scan x-ray">
+            <img src="{{ url_for('static', filename='images/radiology_dept.png') }}" alt="Radiology" class="dept-image">
+            <div class="dept-overlay"></div>
+            <div class="dept-content">
+                <div class="dept-icon-wrapper">
+                    <i data-lucide="scan"></i>
+                </div>
+                <h3 class="dept-name">Radiology & Imaging</h3>
+                <p class="dept-desc">Advanced diagnostic imaging including high-resolution MRI, CT scans, and ultrasound, analyzed with AI-assisted precision for faster results.</p>
+                <div class="dept-meta">
+                    <div class="meta-item"><i data-lucide="map-pin" size="16"></i> <span>Basement Level</span></div>
+                    <div class="meta-item"><i data-lucide="star" size="16" style="color: #facc15; fill: #facc15;"></i> <span>4.7/5</span></div>
+                </div>
+                <a href="{{ url_for('appointments') }}?dept=Radiology" class="dept-action">
+                    <i data-lucide="file-text"></i> View Imaging Services
+                </a>
+            </div>
+        </div>
+
+        <!-- Lab -->
+        <div class="dept-card" data-name="diagnostic laboratories pathology blood tests">
+            <img src="{{ url_for('static', filename='images/diagnostic_lab.png') }}" alt="Diagnostic Lab" class="dept-image">
+            <div class="dept-overlay"></div>
+            <div class="dept-content">
+                <div class="dept-icon-wrapper">
+                    <i data-lucide="microscope"></i>
+                </div>
+                <h3 class="dept-name">Diagnostic Labs</h3>
+                <p class="dept-desc">Full-service pathology and clinical laboratory testing with automated workflows ensuring accuracy and rapid turnaround for all medical tests.</p>
+                <div class="dept-meta">
+                    <div class="meta-item"><i data-lucide="map-pin" size="16"></i> <span>Floor 1, West Wing</span></div>
+                    <div class="meta-item"><i data-lucide="star" size="16" style="color: #facc15; fill: #facc15;"></i> <span>4.8/5</span></div>
+                </div>
+                <a href="{{ url_for('appointments') }}?dept=Lab" class="dept-action">
+                    <i data-lucide="flask-conical"></i> Book Lab Test
+                </a>
+            </div>
+        </div>
+
+        <!-- Outpatient -->
+        <div class="dept-card" data-name="outpatient services clinic consultation">
+            <img src="{{ url_for('static', filename='images/outpatient_clinic.png') }}" alt="Outpatient Services" class="dept-image">
+            <div class="dept-overlay"></div>
+            <div class="dept-content">
+                <div class="dept-icon-wrapper">
+                    <i data-lucide="stethoscope"></i>
+                </div>
+                <h3 class="dept-name">Outpatient Services</h3>
+                <p class="dept-desc">Convenient clinic-based care for routine checkups, specialist consultations, and minor procedures without the need for overnight stays.</p>
+                <div class="dept-meta">
+                    <div class="meta-item"><i data-lucide="map-pin" size="16"></i> <span>Medical Plaza A</span></div>
+                    <div class="meta-item"><i data-lucide="star" size="16" style="color: #facc15; fill: #facc15;"></i> <span>4.6/5</span></div>
+                </div>
+                <a href="{{ url_for('appointments') }}?dept=Outpatient" class="dept-action">
+                    <i data-lucide="calendar"></i> Schedule Consultation
+                </a>
+            </div>
+        </div>
+
+        <!-- Oncology -->
+        <div class="dept-card" data-name="oncology cancer chemotherapy radiation">
+            <img src="{{ url_for('static', filename='images/oncology_dept.png') }}" alt="Oncology" class="dept-image">
+            <div class="dept-overlay"></div>
+            <div class="dept-content">
+                <div class="dept-icon-wrapper">
+                    <i data-lucide="ribbon"></i>
+                </div>
+                <h3 class="dept-name">Oncology Center</h3>
+                <p class="dept-desc">Advanced cancer treatment and supportive care, utilizing precision medicine and the latest clinical trials to provide the best outcomes.</p>
+                <div class="dept-meta">
+                    <div class="meta-item"><i data-lucide="map-pin" size="16"></i> <span>Floor 3, East Wing</span></div>
+                    <div class="meta-item"><i data-lucide="star" size="16" style="color: #facc15; fill: #facc15;"></i> <span>4.9/5</span></div>
+                </div>
+                <a href="{{ url_for('appointments') }}?dept=Oncology" class="dept-action">
+                    <i data-lucide="calendar"></i> Book Oncology Consultation
+                </a>
+            </div>
+        </div>
+
+        <!-- Neurology -->
+        <div class="dept-card" data-name="neurology brain spine nervous system">
+            <img src="{{ url_for('static', filename='images/neurology_dept.png') }}" alt="Neurology" class="dept-image">
+            <div class="dept-overlay"></div>
+            <div class="dept-content">
+                <div class="dept-icon-wrapper">
+                    <i data-lucide="brain"></i>
+                </div>
+                <h3 class="dept-name">Neurology</h3>
+                <p class="dept-desc">Specialized diagnosis and treatment for neurological disorders affecting the brain, spinal cord, and nerves.</p>
+                <div class="dept-meta">
+                    <div class="meta-item"><i data-lucide="map-pin" size="16"></i> <span>Floor 3, West Wing</span></div>
+                    <div class="meta-item"><i data-lucide="star" size="16" style="color: #facc15; fill: #facc15;"></i> <span>4.8/5</span></div>
+                </div>
+                <a href="{{ url_for('appointments') }}?dept=Neurology" class="dept-action">
+                    <i data-lucide="calendar"></i> Book Neurology Appointment
+                </a>
+            </div>
+        </div>
+
+        <!-- Orthopedics -->
+        <div class="dept-card" data-name="orthopedics bones joints surgery">
+            <img src="{{ url_for('static', filename='images/orthopedics_dept.png') }}" alt="Orthopedics" class="dept-image">
+            <div class="dept-overlay"></div>
+            <div class="dept-content">
+                <div class="dept-icon-wrapper">
+                    <i data-lucide="bone"></i>
+                </div>
+                <h3 class="dept-name">Orthopedics</h3>
+                <p class="dept-desc">Expert care for musculoskeletal conditions, including joint replacements, sports medicine, and spinal surgery.</p>
+                <div class="dept-meta">
+                    <div class="meta-item"><i data-lucide="map-pin" size="16"></i> <span>Floor 1, South Wing</span></div>
+                    <div class="meta-item"><i data-lucide="star" size="16" style="color: #facc15; fill: #facc15;"></i> <span>4.7/5</span></div>
+                </div>
+                <a href="{{ url_for('appointments') }}?dept=Orthopedics" class="dept-action">
+                    <i data-lucide="calendar"></i> Book Orthopedics Consultation
+                </a>
+            </div>
+        </div>
+
+        <!-- Dermatology -->
+        <div class="dept-card" data-name="dermatology skin cosmetics laser">
+            <img src="{{ url_for('static', filename='images/dermatology_dept.png') }}" alt="Dermatology" class="dept-image">
+            <div class="dept-overlay"></div>
+            <div class="dept-content">
+                <div class="dept-icon-wrapper">
+                    <i data-lucide="sparkles"></i>
+                </div>
+                <h3 class="dept-name">Dermatology</h3>
+                <p class="dept-desc">Comprehensive skin care services, from medical treatments for skin conditions to advanced cosmetic procedures.</p>
+                <div class="dept-meta">
+                    <div class="meta-item"><i data-lucide="map-pin" size="16"></i> <span>Ground Floor, Medical Plaza B</span></div>
+                    <div class="meta-item"><i data-lucide="star" size="16" style="color: #facc15; fill: #facc15;"></i> <span>4.8/5</span></div>
+                </div>
+                <a href="{{ url_for('appointments') }}?dept=Dermatology" class="dept-action">
+                    <i data-lucide="calendar"></i> Book Dermatology Session
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="leadership-section">
+    <div class="leadership-container">
+        <div class="leadership-card">
+            <div class="leadership-image-area">
+                <img src="{{ url_for('static', filename='images/chief_doctor.png') }}" alt="Chief Medical Officer" class="leader-img">
+                <div class="leader-badge">Chief Medical Officer</div>
+            </div>
+            <div class="leadership-text-area">
+                <span class="sub-title" style="color: var(--accent-blue); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; display: block; margin-bottom: 1rem;">Clinical Leadership</span>
+                <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1.5rem; color: var(--text-primary);">Led by Innovation & Empathy</h2>
+                <p style="font-size: 1.15rem; line-height: 1.8; color: var(--text-secondary); margin-bottom: 2.5rem; font-style: italic;">
+                    "At City General, we don't just treat symptoms; we care for people. Our integration of AI is designed to augment our human touch, not replace it, ensuring every patient has a clear, efficient, and compassionate journey to health."
+                </p>
+                <div class="leader-info">
+                    <h3 style="font-size: 1.75rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Dr. Arthur Sterling, MD, PhD</h3>
+                    <span style="color: var(--accent-blue); font-weight: 600; font-size: 1rem;">Chief Medical Officer & Pioneer in AI Health Systems</span>
+                    <div style="display: flex; gap: 0.5rem; color: #facc15; margin-top: 0.5rem;">
+                        <i data-lucide="star" size="16" style="fill: #facc15;"></i>
+                        <i data-lucide="star" size="16" style="fill: #facc15;"></i>
+                        <i data-lucide="star" size="16" style="fill: #facc15;"></i>
+                        <i data-lucide="star" size="16" style="fill: #facc15;"></i>
+                        <i data-lucide="star" size="16" style="fill: #facc15;"></i>
+                        <span style="color: var(--text-secondary); font-size: 0.85rem; margin-left: 0.5rem;">(12.4k+ Reviews)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .leadership-section {
+        padding: 4rem 2rem;
+        background: var(--bg-dark);
+    }
+    .leadership-container {
+        max-width: 1300px;
+        margin: 0 auto;
+    }
+    .leadership-card {
+        display: flex;
+        align-items: center;
+        gap: 5rem;
+        background: var(--sidebar-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 40px;
+        padding: 4rem;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 40px 100px rgba(0,0,0,0.4);
+    }
+    .leadership-image-area {
+        position: relative;
+        flex-shrink: 0;
+        width: 400px;
+        height: 500px;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    .leader-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .leadership-card:hover .leader-img {
+        transform: scale(1.05);
+    }
+    .leader-badge {
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+        background: var(--accent-blue);
+        color: white;
+        padding: 0.6rem 1.25rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3);
+    }
+    @media (max-width: 1100px) {
+        .leadership-card { flex-direction: column; text-align: center; padding: 3rem 2rem; gap: 3rem; }
+        .leadership-image-area { width: 100%; height: 400px; }
+    }
+</style>
+
+<section class="facility-section">
+    <div class="facility-container">
+        <div class="facility-content">
+            <span class="sub-title" style="color: var(--accent-blue); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; display: block; margin-bottom: 1rem;">Our Campus</span>
+            <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1.5rem; color: var(--text-primary);">A World-Class Healing Environment</h2>
+            <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.8; margin-bottom: 2.5rem;">
+                Located in the heart of the Medical District, our 50-acre campus is designed to foster recovery through nature, advanced architecture, and seamless technology. From our rooftop helipads to our tranquil healing gardens, every square foot is dedicated to your well-being.
+            </p>
+            
+            <div class="location-card">
+                <div class="loc-item">
+                    <div class="loc-icon"><i data-lucide="map-pin"></i></div>
+                    <div class="loc-text">
+                        <strong>Main Campus Address</strong>
+                        <span>123 Health Ave, Medical District, Cityville</span>
+                    </div>
+                </div>
+                <div class="loc-item">
+                    <div class="loc-icon"><i data-lucide="clock"></i></div>
+                    <div class="loc-text">
+                        <strong>Visiting Hours</strong>
+                        <span>Daily: 8:00 AM – 8:00 PM</span>
+                    </div>
+                </div>
+            </div>
+
+            <a href="https://maps.google.com" target="_blank" class="dept-action" style="max-width: 250px; opacity: 1; transform: none; margin-top: 2rem;">
+                <i data-lucide="map"></i> Get Directions
+            </a>
+        </div>
+        <div class="facility-image-wrapper">
+            <img src="{{ url_for('static', filename='images/hospital_campus.png') }}" alt="Hospital Campus" class="facility-image-main">
+            <div class="facility-badge">
+                <i data-lucide="award"></i>
+                <span>Voted #1 Medical Campus 2026</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .facility-section {
+        padding: 8rem 2rem;
+        background: linear-gradient(to bottom, transparent, rgba(56, 189, 248, 0.05));
+    }
+
+    .facility-container {
+        max-width: 1300px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5rem;
+        align-items: center;
+    }
+
+    .facility-image-wrapper {
+        position: relative;
+        border-radius: 32px;
+        overflow: hidden;
+        box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+    }
+
+    .facility-image-main {
+        width: 100%;
+        height: auto;
+        display: block;
+        transition: transform 0.5s ease;
+    }
+
+    .facility-image-wrapper:hover .facility-image-main {
+        transform: scale(1.05);
+    }
+
+    .facility-badge {
+        position: absolute;
+        bottom: 2rem;
+        right: 2rem;
+        background: var(--accent-blue);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 700;
+        box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4);
+        backdrop-filter: blur(10px);
+    }
+
+    .location-card {
+        background: var(--sidebar-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .loc-item {
+        display: flex;
+        gap: 1.25rem;
+        align-items: flex-start;
+    }
+
+    .loc-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(56, 189, 248, 0.1);
+        color: var(--accent-blue);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .loc-text strong {
+        display: block;
+        color: var(--text-primary);
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .loc-text span {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    @media (max-width: 1024px) {
+        .facility-container {
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+        .facility-content { order: 2; }
+        .facility-image-wrapper { order: 1; }
+    }
+</style>
+
+<section class="featured-stats">
+    <div class="stats-inner">
+        <div class="stat-box">
+            <span class="stat-value">25+</span>
+            <span class="stat-label">Specialized Units</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-value">500+</span>
+            <span class="stat-label">Expert Doctors</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-value"><i data-lucide="star" size="24" style="color: #facc15; fill: #facc15; vertical-align: middle; margin-right: 5px;"></i> 98%</span>
+            <span class="stat-label">Patient Satisfaction</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-value">24/7</span>
+            <span class="stat-label">Emergency Support</span>
+        </div>
+    </div>
+</section>
+
+<section style="padding: 4rem 2rem; background: rgba(56, 189, 248, 0.03); text-align: center;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h2 style="font-size: 2rem; margin-bottom: 1rem;">Can't find what you're looking for?</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Our AI-powered navigation assistant can help you find any specialty or room within our facility.</p>
+        <a href="{{ url_for('navigation') }}" class="hero-cta-btn">
+            <i data-lucide="navigation"></i> Start Navigation
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+    // Search Filter Logic
+    const searchInput = document.getElementById('deptSearch');
+    const deptGrid = document.getElementById('deptGrid');
+    const cards = deptGrid.getElementsByClassName('dept-card');
+
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        
+        Array.from(cards).forEach(card => {
+            const searchData = card.getAttribute('data-name');
+            if (searchData.includes(term)) {
+                card.style.display = 'flex';
+                card.style.animation = 'fadeIn 0.5s ease forwards';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // Simple fade in animation for filtered results
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}
+

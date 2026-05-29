@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Enhanced Hero Section -->
+<section class="hospital-hero-premium">
+    <div class="hero-overlay"></div>
+    <div class="hero-content-v2">
+        <div class="hero-text-area">
+            <span class="hero-badge" data-i18n="hero_badge">Advanced Medical Care</span>
+            <h1 class="hero-title-v2" data-i18n="home_hero_title">Compassionate Care,<br>Guided by AI.</h1>
+            <p class="hero-subtitle-v2" data-i18n="home_hero_subtitle">World-class medical facilities equipped with state-of-the-art intelligent navigation and patient-first technology.</p>
+            <div class="hero-actions">
+                <a href="{{ url_for('navigation') }}" class="hero-cta-main" data-i18n="nav_navigate">🗺️ Find Your Way</a>
+                <a href="{{ url_for('appointments') }}" class="hero-cta-secondary" data-i18n="nav_appointments">Book Appointment</a>
+            </div>
+        </div>
+        <div class="hero-feature-grid">
+            <div class="feature-mini-card">
+                <div class="f-icon">🛡️</div>
+                <h4 data-i18n="hero_feat_1_title">Safe & Secure</h4>
+                <p data-i18n="hero_feat_1_desc">Your health data is protected by enterprise-grade AI encryption.</p>
+            </div>
+            <div class="feature-mini-card">
+                <div class="f-icon">⚡</div>
+                <h4 data-i18n="hero_feat_2_title">Rapid Response</h4>
+                <p data-i18n="hero_feat_2_desc">AI-optimized emergency routing reduces transit time by 40%.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Upgraded Live Facility Tracker Section -->
+<section class="capacity-tracker-section reveal">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="sub-title" style="letter-spacing: 2.5px; color: var(--accent-blue); font-weight: 800; font-size: 0.8rem; text-transform: uppercase;">Real-Time Operations</span>
+            <h2 class="section-title" style="font-size: 2.2rem; font-weight: 900; color: var(--text-primary); margin-top: 0.5rem; letter-spacing: -0.5px;">Live Facility Workload Tracker</h2>
+            <p class="section-desc" style="color: var(--text-secondary); max-width: 600px; margin: 0.5rem auto 2rem; font-size: 0.95rem;">Monitor real-time patient queue volume and facility capacity across key hospital sectors. Auto-syncs every 15 seconds.</p>
+        </div>
+        
+        <div class="capacity-grid">
+            <!-- Sector 1 -->
+            <div class="capacity-card">
+                <div class="capacity-header">
+                    <span class="capacity-title">🚨 Emergency & Triage</span>
+                    <span class="capacity-wait-badge wait-high" id="wait-er">12m wait</span>
+                </div>
+                <div class="capacity-indicator-wrapper">
+                    <div class="capacity-meta-row">
+                        <span>Sector Workload</span>
+                        <span id="load-er">88% Capacity</span>
+                    </div>
+                    <div class="capacity-bar-bg">
+                        <div class="capacity-bar-fill" id="bar-er" style="width: 88%;"></div>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:var(--text-secondary); font-weight:600;">
+                    <span>Ambulance Status: Active</span>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <span class="live-pulse-glow"></span>
+                        <span style="color:var(--accent-green)">Live Feed</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sector 2 -->
+            <div class="capacity-card">
+                <div class="capacity-header">
+                    <span class="capacity-title">☢️ MRI & Radiology Suite</span>
+                    <span class="capacity-wait-badge wait-med" id="wait-rad">24m wait</span>
+                </div>
+                <div class="capacity-indicator-wrapper">
+                    <div class="capacity-meta-row">
+                        <span>Sector Workload</span>
+                        <span id="load-rad">64% Capacity</span>
+                    </div>
+                    <div class="capacity-bar-bg">
+                        <div class="capacity-bar-fill" id="bar-rad" style="width: 64%;"></div>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:var(--text-secondary); font-weight:600;">
+                    <span>MRI Scanner Status: Optimal</span>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <span class="live-pulse-glow"></span>
+                        <span style="color:var(--accent-green)">Live Feed</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sector 3 -->
+            <div class="capacity-card">
+                <div class="capacity-header">
+                    <span class="capacity-title">💊 Pharmacy Dispatch</span>
+                    <span class="capacity-wait-badge wait-low" id="wait-pharm">4m wait</span>
+                </div>
+                <div class="capacity-indicator-wrapper">
+                    <div class="capacity-meta-row">
+                        <span>Sector Workload</span>
+                        <span id="load-pharm">38% Capacity</span>
+                    </div>
+                    <div class="capacity-bar-bg">
+                        <div class="capacity-bar-fill" id="bar-pharm" style="width: 38%;"></div>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:var(--text-secondary); font-weight:600;">
+                    <span>Dispensing Units: 4 Active</span>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <span class="live-pulse-glow"></span>
+                        <span style="color:var(--accent-green)">Live Feed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section reveal">
+    <div class="stats-container">
+        <div class="stat-box">
+            <h2 class="stat-number">500+</h2>
+            <p class="stat-label" data-i18n="stat_doctors">Expert Doctors</p>
+        </div>
+        <div class="stat-box">
+            <h2 class="stat-number">24/7</h2>
+            <p class="stat-label" data-i18n="stat_support">Care Support</p>
+        </div>
+        <div class="stat-box">
+            <h2 class="stat-number">15k+</h2>
+            <p class="stat-label" data-i18n="stat_patients">Happy Patients</p>
+        </div>
+        <div class="stat-box">
+            <h2 class="stat-number">98%</h2>
+            <p class="stat-label" data-i18n="stat_success">Success Rate</p>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="why-us-section reveal">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="sub-title" data-i18n="why_us_subtitle">Our Excellence</span>
+            <h2 class="section-title" data-i18n="why_us_title">Why Choose City General?</h2>
+            <p class="section-desc" data-i18n="why_us_desc">We combine human expertise with artificial intelligence to provide the most efficient and compassionate care possible.</p>
+        </div>
+        <div class="features-grid-premium">
+            <div class="p-feature-card">
+                <div class="p-icon-wrapper">🤖</div>
+                <h3 data-i18n="feat_ai_title">AI Navigation</h3>
+                <p data-i18n="feat_ai_desc">Never get lost again. Our intelligent indoor GPS guides you to any department in seconds.</p>
+            </div>
+            <div class="p-feature-card">
+                <div class="p-icon-wrapper">🧬</div>
+                <h3 data-i18n="feat_tech_title">Advanced Diagnostics</h3>
+                <p data-i18n="feat_tech_desc">Utilizing the latest MRI, CT, and robotic surgery technology for precise treatment.</p>
+            </div>
+            <div class="p-feature-card">
+                <div class="p-icon-wrapper">❤️</div>
+                <h3 data-i18n="feat_care_title">Patient-First Care</h3>
+                <p data-i18n="feat_care_desc">Our staff is trained to provide emotional support alongside clinical excellence.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Departments Grid (Enhanced) -->
+<section class="services-section-v2 reveal">
+    <div class="services-container">
+        <div class="section-header text-center">
+            <h2 class="section-title" data-i18n="home_dept_title">Specialized Departments</h2>
+        </div>
+        <div class="services-grid-v2">
+            <a href="{{ url_for('departments') }}#emergency" class="service-card-v2">
+                <div class="card-bg-icon">🚨</div>
+                <div class="card-content">
+                    <h3 data-i18n="home_dept_er_title">Emergency Care</h3>
+                    <p data-i18n="home_dept_er_desc">24/7 critical care with priority AI routing for rapid response.</p>
+                    <span class="card-link">Explore Department &rarr;</span>
+                </div>
+            </a>
+            <a href="{{ url_for('departments') }}#maternity" class="service-card-v2">
+                <div class="card-bg-icon">👶</div>
+                <div class="card-content">
+                    <h3 data-i18n="home_dept_mat_title">Maternity Ward</h3>
+                    <p data-i18n="home_dept_mat_desc">Comprehensive care for expecting mothers and newborns.</p>
+                    <span class="card-link">Explore Department &rarr;</span>
+                </div>
+            </a>
+            <a href="{{ url_for('departments') }}#cardiology" class="service-card-v2">
+                <div class="card-bg-icon">🫀</div>
+                <div class="card-content">
+                    <h3 data-i18n="home_dept_car_title">Cardiology</h3>
+                    <p data-i18n="home_dept_car_desc">Expert heart care with state-of-the-art diagnostic imaging.</p>
+                    <span class="card-link">Explore Department &rarr;</span>
+                </div>
+            </a>
+            <a href="{{ url_for('departments') }}#lab" class="service-card-v2">
+                <div class="card-bg-icon">🔬</div>
+                <div class="card-content">
+                    <h3 data-i18n="home_dept_lab_title">Laboratories</h3>
+                    <p data-i18n="home_dept_lab_desc">Advanced diagnostic and pathology services with rapid results.</p>
+                    <span class="card-link">Explore Department &rarr;</span>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials-section reveal">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2 class="section-title" data-i18n="test_title">What Our Patients Say</h2>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="quote-icon">“</div>
+                <div class="test-rating" style="color: #facc15; margin-bottom: 1rem;">⭐⭐⭐⭐⭐</div>
+                <p class="test-text" data-i18n="test_1_text">The AI navigation system made it so easy to find the radiology lab. No more wandering through confusing hallways!</p>
+                <div class="test-author">
+                    <div class="author-info">
+                        <h4 data-i18n="test_1_name">Sarah Jenkins</h4>
+                        <span data-i18n="test_1_role">Patient</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="quote-icon">“</div>
+                <div class="test-rating" style="color: #facc15; margin-bottom: 1rem;">⭐⭐⭐⭐⭐</div>
+                <p class="test-text" data-i18n="test_2_text">I've never seen a hospital this efficient. The integration of technology and care is truly world-class.</p>
+                <div class="test-author">
+                    <div class="author-info">
+                        <h4 data-i18n="test_2_name">Michael Chen</h4>
+                        <span data-i18n="test_2_role">Patient</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="bottom-cta-section reveal">
+    <div class="cta-card-premium">
+        <h2 data-i18n="cta_title">Ready to experience better care?</h2>
+        <p data-i18n="cta_desc">Book your appointment today or try our intelligent navigation system.</p>
+        <div class="cta-btns">
+            <a href="{{ url_for('appointments') }}" class="primary-btn-v2" data-i18n="nav_appointments">Book Appointment</a>
+            <a href="{{ url_for('navigation') }}" class="outline-btn-v2" data-i18n="home_about_try_btn">Try HospNav &rarr;</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

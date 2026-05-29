@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="app-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="live-badge">Live System Active</div>
+        
+        <div class="project-info">
+            <h2 style="font-size: 1.5rem; font-weight: 900; color: var(--text-primary); margin-bottom: 0.5rem;">AI Navigator</h2>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                Intelligent multi-floor routing with real-time congestion awareness and wheelchair accessibility protocols.
+            </p>
+        </div>
+
+        <div class="control-group">
+            <label data-i18n="search_loc">🔍 Search Location</label>
+            <input type="text" id="nav-search" placeholder="Search departments..." class="search-input">
+        </div>
+
+        <div class="control-group">
+            <label>👥 Number of Persons</label>
+            <select id="num-persons" class="portal-input" style="padding: 0.8rem; width: 100%;">
+                <option value="1" selected>1 Person</option>
+                <option value="2">2 Persons</option>
+                <option value="3">3 Persons</option>
+                <option value="4">4 Persons</option>
+                <option value="5">5 Persons</option>
+                <option value="6">6 Persons</option>
+            </select>
+        </div>
+
+        <div id="sources-container">
+            <div class="control-group">
+                <label data-i18n="src_location">📍 Start Location</label>
+                <select id="start-node" class="start-node-select portal-input" style="padding: 0.8rem; width: 100%;"></select>
+            </div>
+        </div>
+
+        <div id="end-node-group" class="control-group">
+            <label data-i18n="tgt_destination">🎯 Target Destination</label>
+            <select id="end-node" class="portal-input" style="padding: 0.8rem; width: 100%;"></select>
+        </div>
+
+        <div class="control-group">
+            <label data-i18n="search_algo">⚙️ Search Algorithm</label>
+            <select id="algo-select" class="portal-input" style="padding: 0.8rem;">
+                <option value="ASTAR">A* Search (Heuristic — Fastest)</option>
+                <option value="IDASTAR">IDA* Search Algorithm</option>
+                <option value="GREEDY">Greedy Best-First (Heuristic Only)</option>
+                <option value="UCS">Uniform Cost Search (Optimal)</option>
+                <option value="BFS">Breadth-First Search (Fewest Hops)</option>
+                <option value="DFS">Depth-First Search (Experimental)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label data-i18n="constraints">🔒 Safety Protocols</label>
+            <div class="toggle-group">
+                <label class="toggle-switch" for="avoid-crowds">
+                    <input type="checkbox" id="avoid-crowds">
+                    <span class="slider"></span>
+                </label>
+                <label class="toggle-label" for="avoid-crowds" data-i18n="avoid_crowds">Avoid Congestion</label>
+            </div>
+            <div class="toggle-group" style="margin-top:1rem;">
+                <label class="toggle-switch" for="wheelchair-access">
+                    <input type="checkbox" id="wheelchair-access">
+                    <span class="slider"></span>
+                </label>
+                <label class="toggle-label" for="wheelchair-access" data-i18n="wheelchair_only">Wheelchair Access ♿</label>
+            </div>
+        </div>
+
+        <button id="find-path-btn" class="hero-cta-main" style="width: 100%; border: none; padding: 1.2rem; font-weight: 800; border-radius: 18px; cursor: pointer;">
+            ⚡ Compute Best Route
+        </button>
+
+        <button id="emergency-btn" class="emergency-btn" style="width: 100%; margin-top: -1rem; padding: 1rem; border-radius: 18px; border: 1px solid rgba(244, 63, 94, 0.3); background: rgba(244, 63, 94, 0.05); color: #fb7185; font-weight: 800;">
+            🚨 EMERGENCY: ROUTE TO ER
+        </button>
+
+        <!-- Stats Panel -->
+        <div id="stats-panel" class="stats-panel hidden" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: 20px;">
+            <h3 style="font-size: 0.9rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 1rem;">Path Analysis</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                <div class="stat-item"><span>ETA</span><strong id="stat-eta" style="color: var(--accent-blue);">--</strong></div>
+                <div class="stat-item"><span>Distance</span><strong id="stat-dist" style="color: var(--accent-green);">--</strong></div>
+                <div class="stat-item"><span>Steps</span><strong id="stat-steps">--</strong></div>
+                <div class="stat-item"><span>Nodes Explored</span><strong id="stat-explored">--</strong></div>
+                <div class="stat-item"><span>Algorithm</span><strong id="stat-algo">--</strong></div>
+            </div>
+            <button id="show-directions-btn" class="hero-cta-secondary" style="width: 100%; margin-top: 1.5rem; font-size: 0.8rem; white-space: nowrap;">🗺️ Turn-by-Turn</button>
+        </div>
+
+        <!-- Location Details -->
+        <div id="details-panel" class="details-panel hidden" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 20px; color: #f8fafc;">
+            <h3 style="font-size: 0.9rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 1rem; letter-spacing: 0.5px;">📍 Destination Intel</h3>
+            <div id="detail-badge" class="detail-badge" style="display:inline-block; font-size:0.72rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:50px; border:1px solid; text-transform:uppercase; margin-bottom:0.5rem;"></div>
+            <img id="detail-image" src="" alt="Location" style="width: 100%; height: 150px; object-fit: cover; border-radius: 14px; margin: 0.75rem 0; border: 1px solid rgba(255,255,255,0.1); display: block;">
+            <h4 id="detail-title" style="font-size: 1.1rem; font-weight: 800; color: #f8fafc; margin-bottom: 0.5rem;"></h4>
+            <p id="detail-hours" style="font-size: 0.8rem; color: #38bdf8; margin-bottom: 0.5rem; font-weight: 600;"></p>
+            <div id="detail-meta" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.5rem 0;"></div>
+            <p id="detail-info" style="font-size: 0.85rem; color: #94a3b8; line-height: 1.6; margin-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.75rem;"></p>
+        </div>
+    </aside>
+
+    <!-- MAIN MAP -->
+    <main class="main-content">
+        <header class="top-bar" style="padding: 1.5rem 2rem; background: var(--sidebar-bg); backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; gap: 1rem; border-bottom: 1px solid var(--glass-border);">
+            <!-- Row 1: Title -->
+            <h2 style="font-size: 1.6rem; font-weight: 900; letter-spacing: -0.5px; margin:0; color: var(--text-primary);">City General Hospital Map</h2>
+
+            <!-- Row 2: Controls (Filters + 3D) -->
+            <div style="display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:1rem;">
+                <div id="floor-filters" style="display: flex; gap: 0.75rem;"></div>
+                <button onclick="toggleTilt()" class="hero-cta-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 12px; display: flex; align-items: center; gap: 0.5rem; font-weight: 700;">📐 Toggle 3D</button>
+            </div>
+
+            <!-- Row 3: Legends (Nodes + Edge Weights) -->
+            <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:1.5rem; background: rgba(0,0,0,0.02); padding: 0.75rem 1.5rem; border-radius: 100px; border: 1px solid var(--glass-border);">
+                <!-- Node legend -->
+                <div style="display:flex; gap:1rem; align-items:center; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">
+                    <div class="legend-item"><span class="dot start"></span> <span>Start</span></div>
+                    <div class="legend-item"><span class="dot end"></span> <span>Target</span></div>
+                    <div class="legend-item"><span class="dot path"></span> <span>Route</span></div>
+                </div>
+
+                <!-- Divider -->
+                <div style="width:1px; height:24px; background:var(--glass-border);"></div>
+
+                <!-- Person Route Legend -->
+                <div id="multi-person-legend" style="display:none; gap:1rem; align-items:center; font-size: 0.8rem; font-weight: 700;">
+                    <div style="display:flex; align-items:center; gap:0.4rem; color: #3b82f6;"><span style="display:inline-block; width:20px; height:3px; background-image: linear-gradient(to right, #3b82f6 50%, transparent 50%); background-size: 8px 100%;"></span> Person 1</div>
+                    <div style="display:flex; align-items:center; gap:0.4rem; color: #22c55e;"><span style="display:inline-block; width:20px; height:3px; background-image: linear-gradient(to right, #22c55e 50%, transparent 50%); background-size: 8px 100%;"></span> Person 2</div>
+                    <div style="display:flex; align-items:center; gap:0.4rem; color: #a855f7;"><span style="display:inline-block; width:20px; height:3px; background-image: linear-gradient(to right, #a855f7 50%, transparent 50%); background-size: 8px 100%;"></span> Person 3</div>
+                    <div style="display:flex; align-items:center; gap:0.4rem; color: #f97316;"><span style="display:inline-block; width:20px; height:3px; background-image: linear-gradient(to right, #f97316 50%, transparent 50%); background-size: 8px 100%;"></span> Person 4</div>
+                </div>
+
+                <!-- Divider -->
+                <div style="width:1px; height:24px; background:var(--glass-border);" id="multi-person-legend-divider"></div>
+
+                <!-- Edge-weight colour legend -->
+                <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+                    <span style="font-size:0.8rem; color:var(--text-secondary); font-weight:700; white-space:nowrap; margin-right: 0.2rem;">Edge Cost:</span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;background:rgba(34,197,94,0.15);color:#4ade80;border:1.5px solid rgba(34,197,94,0.6);border-radius:20px;padding:3px 12px;">
+                        ●&nbsp;1–3 &nbsp;<span style="font-weight:500;color:#94a3b8;">Near</span>
+                    </span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;background:rgba(56,189,248,0.15);color:#38bdf8;border:1.5px solid rgba(56,189,248,0.6);border-radius:20px;padding:3px 12px;">
+                        ●&nbsp;4–6 &nbsp;<span style="font-weight:500;color:#94a3b8;">Medium</span>
+                    </span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;background:rgba(251,146,60,0.15);color:#fb923c;border:1.5px solid rgba(251,146,60,0.6);border-radius:20px;padding:3px 12px;">
+                        ●&nbsp;7–9 &nbsp;<span style="font-weight:500;color:#94a3b8;">Far</span>
+                    </span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;background:rgba(244,63,94,0.15);color:#f43f5e;border:1.5px solid rgba(244,63,94,0.6);border-radius:20px;padding:3px 12px;">
+                        ●&nbsp;10+ &nbsp;<span style="font-weight:500;color:#94a3b8;">Very Far</span>
+                    </span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;background:rgba(234,179,8,0.2);color:#facc15;border:2px solid #facc15;border-radius:20px;padding:3px 12px;">
+                        ★ &nbsp;Active Path Edge
+                    </span>
+                </div>
+            </div>
+        </header>
+
+
+        <div class="map-area">
+            <div class="map-wrapper" id="map-wrapper">
+                <svg id="hospital-map" viewBox="0 0 1250 820">
+                    <g id="floor-zones-group"></g>
+                    <g id="connections-group"></g>
+                    <g id="active-routes-group"></g>
+                    <g id="nodes-group"></g>
+                    <g id="weightage-group"></g>
+                </svg>
+            </div>
+
+            <!-- Turn-by-Turn Directions -->
+            <div id="directions-panel" class="directions-overlay hidden">
+                <div class="directions-overlay-header" style="padding: 1.5rem; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-size: 1.1rem; font-weight: 800;">Navigation Protocol</h3>
+                    <button id="close-directions" style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem;">✕</button>
+                </div>
+                <div style="display: flex; gap: 0.5rem; padding: 0.8rem 1.5rem; border-bottom: 1px solid var(--glass-border);">
+                    <button id="speak-directions-btn" class="hero-cta-secondary" style="font-size: 0.78rem; flex: 1; padding: 0.5rem 1rem; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 700;">
+                        🔊 Speak Route
+                    </button>
+                    <button id="simulate-path-btn" class="hero-cta-main" style="font-size: 0.78rem; flex: 1; padding: 0.5rem 1rem; border-radius: 10px; border: none; display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 700;">
+                        ▶️ Play Simulator
+                    </button>
+                </div>
+                <div class="directions-overlay-body" style="padding: 1.5rem; overflow-y: auto;">
+                    <ol id="directions-list" class="directions-overlay-list"></ol>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function toggleTilt() {
+        document.getElementById('map-wrapper').classList.toggle('tilt-view');
+    }
+</script>
+{% endblock %}

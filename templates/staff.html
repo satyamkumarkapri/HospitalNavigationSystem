@@ -1,0 +1,842 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    :root {
+        --staff-accent: #6366f1;
+        --staff-accent-dark: #4f46e5;
+        --staff-bg-gradient: radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 40%),
+                             radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.08), transparent 40%);
+    }
+
+    .staff-portal-container {
+        min-height: 100vh;
+        background: var(--staff-bg-gradient);
+        padding: 2rem;
+    }
+
+    /* ─── Login View Styles ─── */
+    .staff-login-wrapper {
+        max-width: 480px;
+        margin: 6rem auto;
+        animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .login-glass-card {
+        background: rgba(30, 41, 59, 0.4);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 32px;
+        padding: 4rem 3rem;
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4);
+        position: relative;
+        overflow: hidden;
+    }
+
+    body.light-theme .login-glass-card {
+        background: rgba(255, 255, 255, 0.6);
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 6px;
+        background: linear-gradient(90deg, var(--staff-accent), #a855f7);
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .login-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        display: inline-block;
+        filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.3));
+    }
+
+    .login-header h2 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .input-group {
+        margin-bottom: 2rem;
+    }
+
+    .input-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 0.8rem;
+    }
+
+
+    .demo-info-box {
+        background: rgba(99, 102, 241, 0.08);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 16px;
+        padding: 1.2rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .demo-info-box p {
+        font-size: 0.8rem;
+        color: var(--staff-accent);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .demo-info-box code {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 2px 6px;
+        border-radius: 4px;
+        color: var(--text-primary);
+    }
+
+    /* ─── Dashboard Styles ─── */
+    .dashboard-layout {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 2.5rem;
+        max-width: 1500px;
+        margin: 0 auto;
+        animation: fadeIn 0.8s ease;
+    }
+
+    .dashboard-sidebar {
+        background: rgba(30, 41, 59, 0.4);
+        backdrop-filter: blur(24px);
+        border: 1px solid var(--glass-border);
+        border-radius: 32px;
+        padding: 3rem 2rem;
+        height: calc(100vh - 8rem);
+        position: sticky;
+        top: 4rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    body.light-theme .dashboard-sidebar {
+        background: rgba(255, 255, 255, 0.7);
+    }
+
+    .profile-card {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .avatar-large {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--staff-accent), #a855f7);
+        border-radius: 30px;
+        margin: 0 auto 1.5rem;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.5rem;
+        color: white;
+        box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+    }
+
+    .sidebar-nav {
+        list-style: none;
+        padding: 0;
+        flex: 1;
+    }
+
+    .nav-btn {
+        width: 100%;
+        padding: 1.2rem 1.5rem;
+        border-radius: 18px;
+        margin-bottom: 0.8rem;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex; align-items: center; gap: 1rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--staff-accent);
+        border-color: rgba(99, 102, 241, 0.2);
+        transform: translateX(5px);
+    }
+
+    .logout-btn {
+        margin-top: 2rem;
+        color: var(--accent-red);
+    }
+    .logout-btn:hover {
+        background: rgba(244, 63, 94, 0.1);
+        color: var(--accent-red);
+        border-color: rgba(244, 63, 94, 0.2);
+    }
+
+    .dashboard-content {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(24px);
+        border: 1px solid var(--glass-border);
+        border-radius: 32px;
+        padding: 4rem;
+        min-height: calc(100vh - 8rem);
+    }
+
+    body.light-theme .dashboard-content {
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 4rem;
+    }
+
+    .header-text h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .header-stats {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .mini-stat {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        text-align: center;
+        min-width: 140px;
+    }
+
+    .mini-stat h4 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--staff-accent);
+        margin-bottom: 0.2rem;
+    }
+
+    .mini-stat p {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    /* Cards */
+    .appt-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .appt-card-v2 {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .appt-card-v2:hover {
+        background: rgba(255, 255, 255, 0.06);
+        transform: translateY(-5px) scale(1.01);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .patient-avatar {
+        width: 60px; height: 60px;
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: 18px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem;
+        margin-right: 1.5rem;
+    }
+
+    .appt-meta {
+        text-align: right;
+    }
+
+    .badge-status {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 0.8rem;
+    }
+    .badge-confirmed { background: rgba(74, 222, 128, 0.1); color: #4ade80; }
+
+    .time-pill {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.2rem;
+    }
+
+    /* Animations */
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(40px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: fadeIn 0.4s ease; }
+
+    @media (max-width: 1100px) {
+        .dashboard-layout { grid-template-columns: 1fr; }
+        .dashboard-sidebar { height: auto; position: static; }
+    }
+</style>
+
+<div class="staff-portal-container">
+    <!-- Login Form -->
+    <div id="staff-login-screen" class="staff-login-wrapper">
+        <div class="login-glass-card">
+            <div class="login-header">
+                <span class="login-icon">👨‍⚕️</span>
+                <h2 data-i18n="staff_login_title">Staff Terminal</h2>
+                <p data-i18n="staff_login_desc">Authorize to access clinical management systems.</p>
+            </div>
+
+            <form onsubmit="handleStaffLogin(event)">
+                <div class="input-group">
+                    <label data-i18n="auth_email">Institutional Email</label>
+                    <input type="email" id="staff-email" class="staff-input" placeholder="name@hospital.com" required>
+                </div>
+                <div class="input-group">
+                    <label data-i18n="auth_pass">Security Credentials</label>
+                    <input type="password" id="staff-pass" class="staff-input" placeholder="••••••••" required>
+                </div>
+
+                <div class="demo-info-box">
+                    <p>
+                        <strong>Quick Demo Access:</strong><br>
+                        Admin: <code>admin@hospital.com</code><br>
+                        Doctor: <code>smith@hospital.com</code><br>
+                        Security Pass: <code>123456</code>
+                    </p>
+                </div>
+
+                <button type="submit" class="hero-cta-btn" style="width: 100%; border: none; cursor: pointer; padding: 1.2rem; font-size: 1.1rem; font-weight: 700; background: linear-gradient(135deg, var(--staff-accent), var(--staff-accent-dark)); box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);">
+                    Authenticate Access
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="staff-dashboard" style="display: none;">
+        <div class="dashboard-layout">
+            <aside class="dashboard-sidebar">
+                <div class="profile-card">
+                    <div class="avatar-large" id="prof-avatar">👨‍⚕️</div>
+                    <h3 id="prof-name" style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.3rem;">Dr. Smith</h3>
+                    <p id="prof-role" style="font-size: 0.85rem; font-weight: 700; color: var(--staff-accent); text-transform: uppercase; letter-spacing: 1px;">Cardiology Specialist</p>
+                </div>
+
+                <div class="sidebar-nav">
+                    <button class="nav-btn active" onclick="changeTab('appt')">
+                        <span>📅</span> Appointments
+                    </button>
+                    <button class="nav-btn" onclick="changeTab('pat')" id="side-pat-link">
+                        <span>👥</span> Patient Directory
+                    </button>
+                    <button class="nav-btn admin-only-nav" onclick="changeTab('doctors')" id="side-doc-link" style="display:none">
+                        <span>🩺</span> Doctor Management
+                    </button>
+                    <button class="nav-btn admin-only-nav" onclick="changeTab('stats')" style="display:none">
+                        <span>📊</span> Analytics
+                    </button>
+                </div>
+
+                <button class="nav-btn logout-btn" onclick="logoutStaff()">
+                    <span>🚪</span> Terminate Session
+                </button>
+            </aside>
+
+            <main class="dashboard-content">
+                <!-- Appointments Pane -->
+                <div id="pane-appt" class="tab-pane active">
+                    <div class="content-header">
+                        <div class="header-text">
+                            <h1 data-i18n="portal_appointments">Clinical Schedule</h1>
+                            <p>Real-time synchronization with patient booking system.</p>
+                        </div>
+                        <div class="header-stats">
+                            <div class="mini-stat">
+                                <h4 id="count-total">0</h4>
+                                <p>Total</p>
+                            </div>
+                            <div class="mini-stat">
+                                <h4 id="count-today" style="color: var(--accent-green);">0</h4>
+                                <p>Today</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="appt-list-v2" class="appt-grid"></div>
+                </div>
+
+                <!-- Patients Pane -->
+                <div id="pane-pat" class="tab-pane">
+                    <div class="content-header">
+                        <div class="header-text">
+                            <h1>Patient Directory</h1>
+                            <p>Confidential medical records and registration vault.</p>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 24px; overflow: hidden;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr style="background: rgba(0,0,0,0.1); border-bottom: 1px solid var(--glass-border);">
+                                    <th style="padding: 1.5rem 2rem; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Patient Identity</th>
+                                    <th style="padding: 1.5rem 2rem; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">System ID</th>
+                                    <th style="padding: 1.5rem 2rem; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Blood</th>
+                                    <th style="padding: 1.5rem 2rem; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pat-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Doctors Pane (Admin only) -->
+                <div id="pane-doctors" class="tab-pane">
+                    <div class="content-header">
+                        <div class="header-text"><h1>Doctor Management</h1><p>Add, update, or remove clinical staff.</p></div>
+                        <button onclick="openDoctorModal()" class="hero-cta-btn" style="border:none;cursor:pointer;padding:0.9rem 2rem;font-size:0.95rem;background:linear-gradient(135deg,var(--staff-accent),#a855f7);">+ Add Doctor</button>
+                    </div>
+                    <div id="doctors-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;"></div>
+                </div>
+
+                <!-- Stats Pane (Admin only) -->
+                <div id="pane-stats" class="tab-pane">
+                    <div class="content-header"><div class="header-text"><h1>Analytics</h1><p>Hospital-wide statistics.</p></div></div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.5rem;margin-bottom:3rem;">
+                        <div class="mini-stat"><h4 id="stat-total-appts">0</h4><p>Total Appointments</p></div>
+                        <div class="mini-stat"><h4 id="stat-total-patients" style="color:#a855f7">0</h4><p>Registered Patients</p></div>
+                        <div class="mini-stat"><h4 id="stat-total-doctors" style="color:#4ade80">0</h4><p>Active Doctors</p></div>
+                        <div class="mini-stat"><h4 id="stat-today" style="color:#fb923c">0</h4><p>Today's Appointments</p></div>
+                    </div>
+                    
+                    <!-- Circular Gauges Analytics Upgrades -->
+                    <h3 style="color:var(--text-primary);font-size:1.2rem;margin-bottom:1.5rem;">Sectors Efficiency & Availability</h3>
+                    <div class="analytics-circular-gauge-wrapper">
+                        <div class="css-circular-gauge" id="gauge-occupancy" style="--percentage: 75;">
+                            <div class="css-circular-gauge-inner-txt">
+                                <strong id="val-gauge-occupancy">75%</strong>
+                                <span>Clinics Load</span>
+                            </div>
+                        </div>
+                        <div class="css-circular-gauge" id="gauge-staffing" style="--percentage: 88;">
+                            <div class="css-circular-gauge-inner-txt">
+                                <strong id="val-gauge-staffing">88%</strong>
+                                <span>Staff Duty</span>
+                            </div>
+                        </div>
+                        <div class="css-circular-gauge" id="gauge-beds" style="--percentage: 62;">
+                            <div class="css-circular-gauge-inner-txt">
+                                <strong id="val-gauge-beds">62%</strong>
+                                <span>Bed Ratio</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style="color:var(--text-primary);font-size:1.2rem;margin-bottom:1.5rem;margin-top:2rem;">Appointments by Doctor</h3>
+                    <div id="stats-breakdown" style="display:flex;flex-direction:column;gap:1rem;"></div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="dashboard-empty" style="display: none; text-align: center; padding: 6rem 0;">
+                    <div style="font-size: 5rem; margin-bottom: 2rem; opacity: 0.2;">🛸</div>
+                    <h3 style="color: var(--text-secondary);">No records found in current sector.</h3>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- Doctor Add/Edit Modal -->
+<div id="doctor-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);align-items:center;justify-content:center;">
+    <div style="background:var(--bg-secondary,#1e293b);border:1px solid var(--glass-border);border-radius:32px;padding:3rem;max-width:520px;width:90%;box-shadow:0 40px 100px rgba(0,0,0,0.5);animation:slideUp 0.4s ease;">
+        <h2 id="modal-title" style="font-size:1.8rem;font-weight:800;color:var(--text-primary);margin-bottom:2rem;">Add Doctor</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+            <div><label style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:0.5rem;">Full Name</label>
+            <input id="doc-name" class="staff-input" placeholder="Dr. John Smith"></div>
+            <div><label style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:0.5rem;">Specialty</label>
+            <input id="doc-spec" class="staff-input" placeholder="Cardiology"></div>
+            <div><label style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:0.5rem;">Email</label>
+            <input id="doc-email" class="staff-input" placeholder="dr@hospital.com" type="email"></div>
+            <div><label style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:0.5rem;">Phone</label>
+            <input id="doc-phone" class="staff-input" placeholder="+1 555 0000"></div>
+            <div><label style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:0.5rem;">Experience</label>
+            <input id="doc-exp" class="staff-input" placeholder="10 years"></div>
+            <div><label style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:0.5rem;">Status</label>
+            <select id="doc-status" class="staff-input"><option value="active">Active</option><option value="on-leave">On Leave</option><option value="inactive">Inactive</option></select></div>
+        </div>
+        <div style="display:flex;gap:1rem;margin-top:2rem;">
+            <button onclick="saveDoctor()" class="hero-cta-btn" style="flex:1;border:none;cursor:pointer;padding:1rem;">💾 Save</button>
+            <button onclick="closeDoctorModal()" class="hero-cta-secondary" style="flex:1;cursor:pointer;padding:1rem;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const STAFF_AUTH_KEY = 'hospnav_staff_session';
+    const DOCTORS_KEY = 'hospnav_doctors';
+    let editingDocId = null;
+
+    // Seed default doctors if none exist
+    function seedDoctors() {
+        const defaults = [
+            { id: 'DR-001', name: 'Dr. Alexander Smith', spec: 'Cardiology',   email: 'smith@hospital.com',  phone: '555-0101', exp: '15 years', status: 'active', avatar: '👨‍⚕️' },
+            { id: 'DR-002', name: 'Dr. Elena Vance',     spec: 'Neurology',    email: 'vance@hospital.com',  phone: '555-0102', exp: '12 years', status: 'active', avatar: '👩‍⚕️' },
+            { id: 'DR-003', name: 'Dr. Sarah Jones',     spec: 'Pediatrics',   email: 'jones@hospital.com',  phone: '555-0103', exp: '8 years',  status: 'active', avatar: '👩‍⚕️' },
+            { id: 'DR-004', name: 'Dr. Marcus Thorne',   spec: 'Orthopedics',  email: 'thorne@hospital.com', phone: '555-0104', exp: '20 years', status: 'active', avatar: '👨‍⚕️' },
+            { id: 'DR-005', name: 'Dr. Sarah Chen',      spec: 'Oncology',     email: 'chen@hospital.com',   phone: '555-0105', exp: '18 years', status: 'active', avatar: '👩‍⚕️' },
+            { id: 'DR-006', name: 'Dr. James Wilson',    spec: 'Neurology',    email: 'wilson@hospital.com', phone: '555-0106', exp: '20 years', status: 'active', avatar: '👨‍⚕️' },
+            { id: 'DR-007', name: 'Dr. Emily Blunt',     spec: 'Orthopedics',  email: 'blunt@hospital.com',  phone: '555-0107', exp: '10 years', status: 'active', avatar: '👩‍⚕️' },
+            { id: 'DR-008', name: 'Dr. Michael Ross',    spec: 'Dermatology',  email: 'ross@hospital.com',   phone: '555-0108', exp: '12 years', status: 'active', avatar: '👨‍⚕️' },
+            { id: 'DR-009', name: 'General Physician',   spec: 'General',      email: 'general@hospital.com',phone: '555-0109', exp: 'Walk-ins', status: 'active', avatar: '🩺' },
+        ];
+
+        const existing = JSON.parse(localStorage.getItem(DOCTORS_KEY) || '[]');
+        // Merge: keep any admin-added doctors, fill in any missing defaults by id
+        const existingIds = existing.map(d => d.id);
+        const missing = defaults.filter(d => !existingIds.includes(d.id));
+        if (missing.length > 0) {
+            localStorage.setItem(DOCTORS_KEY, JSON.stringify([...defaults.filter(d => existingIds.includes(d.id)).map(def => existing.find(e => e.id === def.id) || def), ...missing, ...existing.filter(e => !defaults.find(d => d.id === e.id))]));
+        } else if (existing.length === 0) {
+            localStorage.setItem(DOCTORS_KEY, JSON.stringify(defaults));
+        }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        seedDoctors();
+        const session = JSON.parse(localStorage.getItem(STAFF_AUTH_KEY));
+        if (session) {
+            initDashboard(session);
+        } else {
+            document.getElementById('staff-login-screen').style.display = 'block';
+        }
+    });
+
+    function handleStaffLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('staff-email').value.toLowerCase().trim();
+        const pass = document.getElementById('staff-pass').value;
+
+        if (pass !== '123456') { showToast('⚠️ Invalid Security Clearance', 'error'); return; }
+
+        // Check admin
+        if (email === 'admin@hospital.com') {
+            const staff = { id: 'ADM-X1', name: 'Admin Alpha', role: 'Administrator', dept: 'System Control', avatar: '🔑' };
+            localStorage.setItem(STAFF_AUTH_KEY, JSON.stringify(staff));
+            initDashboard(staff);
+            showToast('✅ Admin Access Granted.', 'info');
+            return;
+        }
+
+        // Check dynamic doctor list
+        const doctors = JSON.parse(localStorage.getItem(DOCTORS_KEY) || '[]');
+        const doc = doctors.find(d => d.email.toLowerCase() === email);
+        if (doc) {
+            const staff = { id: doc.id, name: doc.name, role: 'Doctor', dept: doc.spec, avatar: doc.avatar || '👨‍⚕️' };
+            localStorage.setItem(STAFF_AUTH_KEY, JSON.stringify(staff));
+            initDashboard(staff);
+            showToast('✅ Access Granted. Welcome back.', 'info');
+        } else {
+            showToast('❌ Identity not found in directory.', 'error');
+        }
+    }
+
+    function initDashboard(staff) {
+        document.getElementById('staff-login-screen').style.display = 'none';
+        document.getElementById('staff-dashboard').style.display = 'block';
+        document.getElementById('prof-name').textContent = staff.name;
+        document.getElementById('prof-role').textContent = staff.dept;
+        document.getElementById('prof-avatar').textContent = staff.avatar;
+
+        if (staff.role === 'Administrator') {
+            document.querySelectorAll('.admin-only-nav').forEach(el => el.style.display = 'flex');
+        } else {
+            document.getElementById('side-pat-link').style.display = 'none';
+        }
+        refreshData();
+    }
+
+    function changeTab(tab) {
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        document.getElementById(`pane-${tab}`).classList.add('active');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        refreshData();
+    }
+
+    function logoutStaff() { localStorage.removeItem(STAFF_AUTH_KEY); location.reload(); }
+
+    function refreshData() {
+        const staff = JSON.parse(localStorage.getItem(STAFF_AUTH_KEY));
+        const appts = JSON.parse(localStorage.getItem('hospnav_appointments') || '[]');
+        const users = JSON.parse(localStorage.getItem('hospnav_patients_vault') || '{}');
+        const doctors = JSON.parse(localStorage.getItem(DOCTORS_KEY) || '[]');
+        const todayStr = new Date().toLocaleDateString('en-GB');
+
+        // ── Appointments ──
+        let filtered = appts;
+        if (staff.role === 'Doctor') {
+            const surname = staff.name.split(' ').slice(1).join(' ');
+            filtered = appts.filter(a => a.doctor && a.doctor.includes(surname));
+        }
+
+        document.getElementById('count-total').textContent = filtered.length;
+        document.getElementById('count-today').textContent = filtered.filter(a => a.date === todayStr).length;
+
+        const listV2 = document.getElementById('appt-list-v2');
+        const emptyState = document.getElementById('dashboard-empty');
+
+        if (filtered.length === 0) {
+            listV2.innerHTML = '';
+            emptyState.style.display = 'block';
+        } else {
+            emptyState.style.display = 'none';
+            listV2.innerHTML = filtered.slice().reverse().map((a, i) => {
+                const pd = users[a.email] || {};
+                const pName = pd.name || 'Unknown Patient';
+                const bloodTag = pd.blood ? `<span style="background:rgba(244,63,94,0.1);color:#fb7185;padding:2px 8px;border-radius:10px;font-size:0.75rem;font-weight:800;margin-left:6px;">${pd.blood}</span>` : '';
+                const cancelIdx = appts.findIndex(x => x.id === a.id);
+                return `
+                <div class="appt-card-v2">
+                    <div style="display:flex;align-items:center;">
+                        <div class="patient-avatar">👤</div>
+                        <div>
+                            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem;">
+                                <span class="badge-status badge-confirmed">Confirmed</span>
+                                <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:700;">${a.id || ''}</span>
+                                ${bloodTag}
+                            </div>
+                            <h4 style="font-size:1.2rem;color:var(--text-primary);margin-bottom:0.2rem;">${pName}</h4>
+                            <p style="font-size:0.85rem;color:var(--text-secondary);">${a.reason || 'General Consultation'} · ${a.doctor}</p>
+                            <p style="font-size:0.8rem;color:var(--staff-accent);margin-top:0.3rem;font-weight:700;">${a.phone} · ${a.email}</p>
+                        </div>
+                    </div>
+                    <div class="appt-meta">
+                        <div class="time-pill">${a.time}</div>
+                        <div style="color:var(--text-secondary);font-size:0.85rem;font-weight:600;">${a.date}</div>
+                        ${staff.role === 'Administrator' ? `<button onclick="cancelAppt(${cancelIdx})" class="delete-btn" style="margin-top:1rem;">🗑 Cancel</button>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ── Patients Table (Admin) ──
+        if (staff.role === 'Administrator') {
+            const patTable = document.getElementById('pat-table-body');
+            const userList = Object.values(users);
+            patTable.innerHTML = userList.length === 0
+                ? `<tr><td colspan="4" style="padding:2rem;text-align:center;color:var(--text-secondary);">No registered patients yet.</td></tr>`
+                : userList.map(u => `
+                <tr style="border-bottom:1px solid var(--glass-border);">
+                    <td style="padding:1.5rem 2rem;">
+                        <div style="font-weight:700;color:var(--text-primary);">${u.name || 'Anonymous'}</div>
+                        <div style="font-size:0.75rem;color:var(--text-secondary);">${u.email}</div>
+                    </td>
+                    <td style="padding:1.5rem 2rem;font-family:monospace;font-weight:700;color:var(--staff-accent);">${u.id || '---'}</td>
+                    <td style="padding:1.5rem 2rem;color:#fb7185;font-weight:800;">${u.blood || '-'}</td>
+                    <td style="padding:1.5rem 2rem;">
+                        <button class="delete-btn" onclick="wipeUser('${u.email}')">🗑 Remove</button>
+                    </td>
+                </tr>`).join('');
+
+            // ── Doctors Grid ──
+            const grid = document.getElementById('doctors-grid');
+            grid.innerHTML = doctors.map(d => {
+                const docAppts = appts.filter(a => a.doctor && a.doctor.includes(d.name.split(' ')[1]));
+                const statusColor = d.status === 'active' ? '#4ade80' : d.status === 'on-leave' ? '#fb923c' : '#94a3b8';
+                return `
+                <div style="background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:24px;padding:2rem;transition:all 0.3s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.2rem;">
+                        <div style="font-size:2.5rem;">${d.avatar || '👨‍⚕️'}</div>
+                        <span style="font-size:0.7rem;font-weight:800;padding:3px 10px;border-radius:20px;background:rgba(74,222,128,0.1);color:${statusColor};text-transform:uppercase;">${d.status}</span>
+                    </div>
+                    <h4 style="font-size:1.1rem;font-weight:800;color:var(--text-primary);margin-bottom:0.2rem;">${d.name}</h4>
+                    <p style="font-size:0.85rem;color:var(--staff-accent);font-weight:700;margin-bottom:0.8rem;">${d.spec}</p>
+                    <p style="font-size:0.8rem;color:var(--text-secondary);">📧 ${d.email}</p>
+                    <p style="font-size:0.8rem;color:var(--text-secondary);">📅 ${docAppts.length} appointment${docAppts.length !== 1 ? 's' : ''}</p>
+                    <p style="font-size:0.8rem;color:var(--text-secondary);">⏳ ${d.exp || 'N/A'}</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-top:1.5rem;">
+                        <button onclick="editDoctor('${d.id}')" class="hero-cta-secondary" style="font-size:0.8rem;padding:0.6rem;text-align:center;border-radius:12px;cursor:pointer;">✏️ Edit</button>
+                        <button onclick="removeDoctor('${d.id}')" class="delete-btn" style="font-size:0.8rem;padding:0.6rem;border-radius:12px;">🗑 Remove</button>
+                    </div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('stat-total-appts').textContent = appts.length;
+            document.getElementById('stat-total-patients').textContent = userList.length;
+            document.getElementById('stat-total-doctors').textContent = doctors.filter(d => d.status === 'active').length;
+            document.getElementById('stat-today').textContent = appts.filter(a => a.date === todayStr).length;
+
+            // Dynamically calculate circular occupancy rates
+            const totalDocs = doctors.length;
+            const activeDocs = doctors.filter(d => d.status === 'active').length;
+            const dutyRatio = totalDocs ? Math.round((activeDocs / totalDocs) * 100) : 0;
+            
+            const activeAppts = appts.length;
+            const clinicLoad = Math.min(Math.round((activeAppts / 20) * 100), 100) || 45; // simulated clinic load out of 20 appts cap
+            const bedRatio = Math.round(55 + (activeAppts % 5) * 5); // simulated based on load fluctuation
+            
+            const gOccupancy = document.getElementById('gauge-occupancy');
+            const gStaffing = document.getElementById('gauge-staffing');
+            const gBeds = document.getElementById('gauge-beds');
+            
+            if (gOccupancy) {
+                gOccupancy.style.setProperty('--percentage', clinicLoad);
+                document.getElementById('val-gauge-occupancy').textContent = `${clinicLoad}%`;
+            }
+            if (gStaffing) {
+                gStaffing.style.setProperty('--percentage', dutyRatio);
+                document.getElementById('val-gauge-staffing').textContent = `${dutyRatio}%`;
+            }
+            if (gBeds) {
+                gBeds.style.setProperty('--percentage', bedRatio);
+                document.getElementById('val-gauge-beds').textContent = `${bedRatio}%`;
+            }
+
+            const breakdown = document.getElementById('stats-breakdown');
+            breakdown.innerHTML = doctors.map(d => {
+                const cnt = appts.filter(a => a.doctor && a.doctor.includes(d.name.split(' ')[1])).length;
+                const pct = appts.length ? Math.round((cnt / appts.length) * 100) : 0;
+                return `
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:16px;padding:1.2rem 1.5rem;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:0.6rem;">
+                        <span style="font-weight:700;color:var(--text-primary);">${d.name}</span>
+                        <span style="font-weight:800;color:var(--staff-accent);">${cnt} appt${cnt !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.05);border-radius:10px;height:8px;">
+                        <div style="background:linear-gradient(90deg,var(--staff-accent),#a855f7);border-radius:10px;height:8px;width:${pct}%;transition:width 0.6s;"></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+    }
+
+    // ── Doctor Modal ──
+    function openDoctorModal(docId = null) {
+        editingDocId = docId;
+        const modal = document.getElementById('doctor-modal');
+        modal.style.display = 'flex';
+        document.getElementById('modal-title').textContent = docId ? 'Edit Doctor' : 'Add Doctor';
+
+        if (docId) {
+            const doctors = JSON.parse(localStorage.getItem(DOCTORS_KEY) || '[]');
+            const d = doctors.find(x => x.id === docId);
+            if (d) {
+                document.getElementById('doc-name').value = d.name;
+                document.getElementById('doc-spec').value = d.spec;
+                document.getElementById('doc-email').value = d.email;
+                document.getElementById('doc-phone').value = d.phone;
+                document.getElementById('doc-exp').value = d.exp;
+                document.getElementById('doc-status').value = d.status;
+            }
+        } else {
+            ['doc-name','doc-spec','doc-email','doc-phone','doc-exp'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('doc-status').value = 'active';
+        }
+    }
+
+    function closeDoctorModal() {
+        document.getElementById('doctor-modal').style.display = 'none';
+        editingDocId = null;
+    }
+
+    function saveDoctor() {
+        const name = document.getElementById('doc-name').value.trim();
+        const spec = document.getElementById('doc-spec').value.trim();
+        const email = document.getElementById('doc-email').value.trim();
+        const phone = document.getElementById('doc-phone').value.trim();
+        const exp = document.getElementById('doc-exp').value.trim();
+        const status = document.getElementById('doc-status').value;
+
+        if (!name || !spec || !email) { showToast('⚠️ Name, Specialty & Email are required.', 'error'); return; }
+
+        const doctors = JSON.parse(localStorage.getItem(DOCTORS_KEY) || '[]');
+        if (editingDocId) {
+            const idx = doctors.findIndex(d => d.id === editingDocId);
+            if (idx > -1) doctors[idx] = { ...doctors[idx], name, spec, email, phone, exp, status };
+        } else {
+            const newId = 'DR-' + String(doctors.length + 1).padStart(3, '0');
+            doctors.push({ id: newId, name, spec, email, phone, exp, status, avatar: '👨‍⚕️' });
+        }
+        localStorage.setItem(DOCTORS_KEY, JSON.stringify(doctors));
+        closeDoctorModal();
+        refreshData();
+        showToast(editingDocId ? '✅ Doctor updated.' : '✅ Doctor added!', 'info');
+    }
+
+    function editDoctor(id) { openDoctorModal(id); }
+
+    function removeDoctor(id) {
+        if (!confirm('Remove this doctor from the system?')) return;
+        const doctors = JSON.parse(localStorage.getItem(DOCTORS_KEY) || '[]');
+        localStorage.setItem(DOCTORS_KEY, JSON.stringify(doctors.filter(d => d.id !== id)));
+        refreshData();
+        showToast('🗑️ Doctor removed.', 'info');
+    }
+
+    function cancelAppt(idx) {
+        if (!confirm('Permanently cancel this appointment?')) return;
+        const appts = JSON.parse(localStorage.getItem('hospnav_appointments') || '[]');
+        appts.splice(idx, 1);
+        localStorage.setItem('hospnav_appointments', JSON.stringify(appts));
+        refreshData();
+        showToast('🗑️ Appointment cancelled.', 'info');
+    }
+
+    function wipeUser(email) {
+        if (!confirm(`Remove all data for ${email}?`)) return;
+        const users = JSON.parse(localStorage.getItem('hospnav_patients_vault') || '{}');
+        delete users[email];
+        localStorage.setItem('hospnav_patients_vault', JSON.stringify(users));
+        const appts = JSON.parse(localStorage.getItem('hospnav_appointments') || '[]');
+        localStorage.setItem('hospnav_appointments', JSON.stringify(appts.filter(a => a.email !== email)));
+        refreshData();
+        showToast('🧹 Patient record purged.', 'info');
+    }
+</script>
+
+
+
+
+{% endblock %}
+

@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="about-section" style="padding: 6rem 10%; background: radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.05), transparent);">
+    <div style="max-width: 1000px; margin: 0 auto;">
+        <h1 class="hero-title" style="font-size: 3.5rem; margin-bottom: 1rem;">Join Our Team</h1>
+        <p class="hero-subtitle" style="text-align: left; margin-bottom: 4rem; max-width: 700px;">Build a rewarding career at the forefront of healthcare innovation. We are looking for passionate professionals to join our world-class medical staff.</p>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; width: 100%;">
+            <!-- Job Card 1 -->
+            <div class="job-card" style="background: var(--sidebar-bg); backdrop-filter: blur(20px); padding: 2.5rem; border-radius: 24px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                        <span style="background: rgba(56, 189, 248, 0.1); color: var(--accent-blue); padding: 0.4rem 1rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Clinical</span>
+                        <span style="color: var(--text-secondary); font-size: 0.85rem;">Full-Time</span>
+                    </div>
+                    <h3 style="color: var(--text-primary); font-size: 1.6rem; margin-bottom: 0.4rem;">Registered Nurse (Emergency)</h3>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary);">Location: Emergency Dept | Shift: Rotational</p>
+                </div>
+                <button onclick="openApplyModal('Registered Nurse (Emergency)')" class="hero-cta-btn" style="border: none; padding: 1rem 2rem; font-size: 0.95rem;">Apply Now</button>
+            </div>
+
+            <!-- Job Card 2 -->
+            <div class="job-card" style="background: var(--sidebar-bg); backdrop-filter: blur(20px); padding: 2.5rem; border-radius: 24px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                        <span style="background: rgba(167, 139, 250, 0.1); color: #a78bfa; padding: 0.4rem 1rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Diagnostics</span>
+                        <span style="color: var(--text-secondary); font-size: 0.85rem;">Part-Time</span>
+                    </div>
+                    <h3 style="color: var(--text-primary); font-size: 1.6rem; margin-bottom: 0.4rem;">Medical Lab Technician</h3>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary);">Location: Diagnostics | Shift: Day Shift</p>
+                </div>
+                <button onclick="openApplyModal('Medical Lab Technician')" class="hero-cta-btn" style="border: none; padding: 1rem 2rem; font-size: 0.95rem;">Apply Now</button>
+            </div>
+
+            <!-- Job Card 3 -->
+            <div class="job-card" style="background: var(--sidebar-bg); backdrop-filter: blur(20px); padding: 2.5rem; border-radius: 24px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                        <span style="background: rgba(244, 63, 94, 0.1); color: var(--accent-red); padding: 0.4rem 1rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Surgery</span>
+                        <span style="color: var(--text-secondary); font-size: 0.85rem;">Full-Time</span>
+                    </div>
+                    <h3 style="color: var(--text-primary); font-size: 1.6rem; margin-bottom: 0.4rem;">Senior Surgical Assistant</h3>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary);">Location: Operating Theatre | Shift: On-Call</p>
+                </div>
+                <button onclick="openApplyModal('Senior Surgical Assistant')" class="hero-cta-btn" style="border: none; padding: 1rem 2rem; font-size: 0.95rem;">Apply Now</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Application Modal -->
+<div id="apply-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center; padding: 2rem;">
+    <div style="background: var(--bg-dark); width: 100%; max-width: 600px; border-radius: 32px; border: 1px solid var(--glass-border); padding: 3rem; position: relative; box-shadow: 0 30px 60px rgba(0,0,0,0.5);">
+        <button onclick="closeModal()" style="position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.5rem;">&times;</button>
+        
+        <h2 style="margin-bottom: 0.5rem; color: var(--text-primary); font-size: 2rem;">Apply for Position</h2>
+        <p id="job-title-display" style="color: var(--accent-blue); font-weight: 700; margin-bottom: 2.5rem; font-size: 1.1rem;"></p>
+
+        <form onsubmit="handleApply(event)">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div class="control-group">
+                    <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Full Name</label>
+                    <input type="text" placeholder="Jane Doe" style="width: 100%; padding: 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-primary);" required>
+                </div>
+                <div class="control-group">
+                    <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Email Address</label>
+                    <input type="email" placeholder="jane@example.com" style="width: 100%; padding: 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-primary);" required>
+                </div>
+            </div>
+
+            <div class="control-group" style="margin-bottom: 1.5rem;">
+                <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Resume / CV (PDF)</label>
+                <input type="file" accept=".pdf" style="width: 100%; padding: 0.8rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-secondary); font-size: 0.9rem;" required>
+            </div>
+
+            <div class="control-group" style="margin-bottom: 2.5rem;">
+                <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; display: block;">Why should we hire you?</label>
+                <textarea placeholder="Tell us about your experience..." style="width: 100%; padding: 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-primary); min-height: 120px; resize: vertical;"></textarea>
+            </div>
+
+            <button type="submit" class="hero-cta-btn" style="width: 100%; border: none; cursor: pointer; padding: 1.2rem; font-size: 1.1rem; font-weight: 700;">Submit Application</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openApplyModal(title) {
+    document.getElementById('job-title-display').textContent = title;
+    const modal = document.getElementById('apply-modal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    const modal = document.getElementById('apply-modal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function handleApply(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    setTimeout(() => {
+        alert('Application Sent Successfully! Our HR team will review your profile and get back to you soon.');
+        closeModal();
+        btn.textContent = 'Submit Application';
+        btn.disabled = false;
+    }, 1500);
+}
+
+// Close on background click
+document.getElementById('apply-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+</script>
+
+<style>
+.job-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-blue) !important;
+    box-shadow: 0 20px 40px rgba(56, 189, 248, 0.15) !important;
+}
+</style>
+{% endblock %}

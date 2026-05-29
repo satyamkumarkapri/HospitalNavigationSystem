@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City General Hospital - App Entry</title>
+    <!-- Redirects to the local Flask server -->
+    <meta http-equiv="refresh" content="0; url=http://127.0.0.1:5000/" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 600px;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="margin-top: 0;">🏥 Starting Hospital Navigation...</h2>
+        <p>If you are not redirected automatically, please ensure your Python Flask server is running (`python app.py`) and click the link below:</p>
+        <p><a href="http://127.0.0.1:5000/">Open App (http://127.0.0.1:5000/)</a></p>
+        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 2rem 0;">
+        <p style="font-size: 0.85rem; color: #94a3b8;">
+            <strong>Note for GitHub:</strong> Because this project is built with Python and Flask (using Jinja templates and backend routing), it requires a backend server to run. It cannot be hosted directly as a static website on GitHub Pages. To host it live on the internet, you should deploy the repository to a service like Render, Heroku, or PythonAnywhere.
+        </p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}City General Hospital | Compassionate Care{% endblock %}</title>
+    <meta name="description" content="City General Hospital — compassionate care guided by AI-powered navigation. Book appointments, find departments, and navigate our facilities.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.5">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons - Using a more stable version and loading via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.400.0/dist/umd/lucide.min.js"></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Top Utility Bar -->
+    <div class="top-utility-bar">
+        <div class="utility-bar-inner">
+            <div class="utility-left">
+                <span>🏥 <strong data-i18n="utility_emergency">Emergency</strong>: 911</span>
+                <span>📞 <strong data-i18n="utility_mainline">Main Line</strong>: (555) 123-4567</span>
+                <span class="utility-hours" data-i18n="utility_open247">🕐 Open 24/7</span>
+            </div>
+            <div class="utility-right">
+                <a href="{{ url_for('portal') }}" class="utility-link" data-i18n="utility_portal">Patient Portal</a>
+                <a href="{{ url_for('careers') }}" class="utility-link" data-i18n="utility_careers">Careers</a>
+                <a href="{{ url_for('volunteer') }}" class="utility-link" data-i18n="utility_volunteer">Volunteer</a>
+                <a href="{{ url_for('staff') }}" class="utility-link" data-i18n="utility_staff">Staff Login</a>
+                <div class="lang-selector-wrapper" id="lang-selector-wrapper">
+                    <label class="lang-select-label" for="lang-select">
+                        <select id="lang-select" class="lang-native-select"
+                                onchange="if(window.setLanguage) window.setLanguage(this.value)">
+                            <option value="en">🇺🇸 English</option>
+                            <option value="hi">🇮🇳 हिन्दी</option>
+                            <option value="es">🇪🇸 Español</option>
+                            <option value="fr">🇫🇷 Français</option>
+                            <option value="ar">🇸🇦 العربية</option>
+                            <option value="zh">🇨🇳 中文</option>
+                            <option value="de">🇩🇪 Deutsch</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="global-navbar">
+        <div class="nav-brand">
+            <a href="{{ url_for('index') }}" style="text-decoration: none;">
+                <div class="logo" style="margin: 0;">
+                    <h1>City General Hospital</h1>
+                    <span style="font-size: 0.75rem; letter-spacing: 1px; color: var(--text-secondary);" data-i18n="tagline">Compassionate Care, Guided by AI</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Mobile hamburger -->
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Open navigation">
+            <span></span><span></span><span></span>
+        </button>
+
+        <ul class="nav-links" id="nav-links">
+            <li><a href="{{ url_for('index') }}" data-i18n="nav_home">Home</a></li>
+            <li><a href="{{ url_for('departments') }}" data-i18n="nav_departments">Departments</a></li>
+            <li><a href="{{ url_for('patients') }}" data-i18n="nav_patients">Patients &amp; Visitors</a></li>
+            <li><a href="{{ url_for('contact') }}" data-i18n="nav_contact">Contact Us</a></li>
+            <li><a href="{{ url_for('appointments') }}" data-i18n="nav_appointments">Book Appointment</a></li>
+            <li>
+                <a href="{{ url_for('navigation') }}" class="nav-cta" data-i18n="nav_navigate">🗺️ Find Your Way</a>
+            </li>
+            <li>
+                <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Theme">
+                    <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                </button>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="page-content page-fade-in">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="hospital-footer-v2">
+        <div class="footer-top-gradient"></div>
+        <div class="footer-main-v2">
+            <div class="footer-grid-v2">
+                <!-- Column 1: Brand & Identity -->
+                <div class="footer-col-v2">
+                    <div class="footer-brand-v2">
+                        <h3>City General Hospital</h3>
+                        <p class="brand-tagline">Compassionate Care, Guided by AI.</p>
+                    </div>
+                    <div class="footer-contact-info">
+                        <div class="contact-item-v2">
+                            <i data-lucide="map-pin" size="18"></i>
+                            <span>123 Health Ave, Medical District, Cityville</span>
+                        </div>
+                        <div class="contact-item-v2">
+                            <i data-lucide="phone" size="18"></i>
+                            <span>General: (555) 123-4567</span>
+                        </div>
+                        <div class="contact-item-v2 emergency">
+                            <i data-lucide="alert-circle" size="18"></i>
+                            <span>Emergency: 911 (24/7)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 2: Patient Resources -->
+                <div class="footer-col-v2">
+                    <h4>Patient Resources</h4>
+                    <ul class="footer-links-v2">
+                        <li><a href="{{ url_for('appointments') }}">Book Appointment</a></li>
+                        <li><a href="{{ url_for('portal') }}">Patient Portal</a></li>
+                        <li><a href="{{ url_for('patients') }}">Visitors Guide</a></li>
+                        <li><a href="{{ url_for('navigation') }}">HospNav Assistant</a></li>
+                        <li><a href="{{ url_for('billing') }}">Billing & Insurance</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Institutional -->
+                <div class="footer-col-v2">
+                    <h4>Our Institution</h4>
+                    <ul class="footer-links-v2">
+                        <li><a href="{{ url_for('departments') }}">Departments</a></li>
+                        <li><a href="{{ url_for('careers') }}">Careers & Residency</a></li>
+                        <li><a href="{{ url_for('volunteer') }}">Volunteer Programs</a></li>
+                        <li><a href="{{ url_for('research') }}">Research & Trials</a></li>
+                        <li><a href="{{ url_for('staff') }}">Staff Login</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 4: Newsletter & Social -->
+                <div class="footer-col-v2">
+                    <h4>Stay Informed</h4>
+                    <p class="footer-p-small">Receive health tips and hospital updates directly to your inbox.</p>
+                    <div class="newsletter-form-v2">
+                        <input type="email" placeholder="Email address" aria-label="Newsletter email">
+                        <button type="button" aria-label="Subscribe"><i data-lucide="send" size="18"></i></button>
+                    </div>
+                    <div class="footer-social-v2">
+                        <a href="https://facebook.com" target="_blank" aria-label="Facebook"><i data-lucide="facebook" size="20"></i></a>
+                        <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i data-lucide="twitter" size="20"></i></a>
+                        <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn"><i data-lucide="linkedin" size="20"></i></a>
+                        <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i data-lucide="instagram" size="20"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom-v2">
+            <div class="footer-bottom-inner">
+                <p>&copy; 2026 City General Hospital. All rights reserved. <span class="hide-mobile">| Designed by Satyam Kr Kapri | Powered by HospNav AI Architecture.</span></p>
+                <div class="footer-legal-v2">
+                    <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+                    <a href="{{ url_for('terms') }}">Terms of Service</a>
+                    <a href="{{ url_for('accessibility') }}">Accessibility</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AI CHAT ASSISTANT WIDGET -->
+    <div class="ai-chat-launcher" id="ai-chat-launcher" onclick="toggleAIChat()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square-text"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 7h8"/><path d="M8 11h6"/></svg>
+        <span class="ai-chat-launcher-badge" id="ai-chat-badge">1</span>
+    </div>
+
+    <div class="ai-chat-window" id="ai-chat-window">
+        <div class="ai-chat-header">
+            <div class="ai-chat-header-info">
+                <div class="ai-chat-avatar">🤖</div>
+                <div>
+                    <div class="ai-chat-header-title">HospNav AI Assistant</div>
+                    <div class="ai-chat-header-status">
+                        <span class="live-pulse-glow"></span> Online
+                    </div>
+                </div>
+            </div>
+            <button class="ai-chat-close-btn" onclick="toggleAIChat()" aria-label="Close Chat">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        
+        <div class="ai-chat-body" id="ai-chat-body">
+            <div class="chat-bubble assistant">
+                Hello! I am your <strong>HospNav AI Assistant</strong>. 🏥 I can help you find departments, direct routes to medical rooms, or assist you in booking appointments. How can I guide you today?
+            </div>
+        </div>
+        
+        <div class="ai-chat-suggestions" id="ai-chat-suggestions">
+            <span class="suggestion-chip" onclick="handleSuggestion('🩺 Route to Cardiology')">🩺 Cardiology Route</span>
+            <span class="suggestion-chip" onclick="handleSuggestion('🚨 Emergency ER')">🚨 Emergency ER</span>
+            <span class="suggestion-chip" onclick="handleSuggestion('📅 Book Appointment')">📅 Book Appointment</span>
+            <span class="suggestion-chip" onclick="handleSuggestion('🔒 Patient Portal')">🔒 Patient Portal</span>
+        </div>
+        
+        <div class="ai-chat-footer">
+            <div class="chat-input-wrapper">
+                <input type="text" class="chat-text-input" id="chat-text-input" placeholder="Ask a question..." onkeydown="if(event.key === 'Enter') sendChatMessage()">
+                <button class="chat-voice-toggle-btn" id="chat-voice-toggle-btn" onclick="toggleVoiceSpeech()" title="Toggle Voice Feedback">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                </button>
+            </div>
+            <button class="chat-send-btn" onclick="sendChatMessage()" aria-label="Send Message">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/i18n.js') }}?v=2.5"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}?v=2.5"></script>
+    {% block scripts %}{% endblock %}
+
+    <!-- Inline init: runs fresh every page load, bypasses all JS file caching -->
+    <script>
+    (function() {
+        // Restore saved language on the select element
+        var saved = localStorage.getItem('lang') || 'en';
+        var sel = document.getElementById('lang-select');
+        if (sel) sel.value = saved;
+
+        // Mobile hamburger
+        var hamburger = document.getElementById('nav-hamburger');
+        var navLinks  = document.getElementById('nav-links');
+        if (hamburger && navLinks) {
+            hamburger.addEventListener('click', function() {
+                navLinks.classList.toggle('open');
+                hamburger.classList.toggle('active');
+            });
+            navLinks.querySelectorAll('a').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    navLinks.classList.remove('open');
+                    hamburger.classList.remove('active');
+                });
+            });
+        }
+
+        // Initialize Lucide icons on every page
+        function initLucide() {
+            if (window.lucide) {
+                lucide.createIcons();
+            } else {
+                setTimeout(initLucide, 100);
+            }
+        }
+        
+        // Ensure initialization runs after DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initLucide);
+        } else {
+            initLucide();
+        }
+        window.addEventListener('load', initLucide);
+    })();
+    </script>
+    
+</body>
+</html>

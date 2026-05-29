@@ -1,0 +1,842 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    :root {
+        --booking-accent: #0ea5e9;
+        --booking-bg: radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(99, 102, 241, 0.08), transparent 40%);
+    }
+
+    .booking-page-container {
+        min-height: 100vh;
+        background: var(--booking-bg);
+        padding: 6rem 2rem;
+    }
+
+    .booking-header {
+        max-width: 1200px;
+        margin: 0 auto 4rem;
+        text-align: center;
+    }
+
+    .booking-header h1 {
+        font-size: 3.5rem;
+        font-weight: 900;
+        letter-spacing: -1.5px;
+        background: linear-gradient(135deg, var(--text-primary), var(--booking-accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+    }
+
+    /* ─── Stepper Progress ─── */
+    .booking-stepper {
+        display: flex;
+        justify-content: center;
+        gap: 4rem;
+        margin-bottom: 5rem;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+        opacity: 0.3;
+        transition: all 0.4s;
+        position: relative;
+    }
+
+    .step-item.active { opacity: 1; transform: scale(1.1); }
+    .step-item.completed { opacity: 0.6; }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid var(--glass-border);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800;
+        font-size: 0.9rem;
+    }
+
+    .active .step-number {
+        background: var(--booking-accent);
+        border-color: var(--booking-accent);
+        box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+        color: white;
+    }
+
+    .step-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-secondary);
+    }
+
+    /* ─── Step Content ─── */
+    .step-content {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: none;
+        animation: stepFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .step-content.active { display: block; }
+
+    @keyframes stepFadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Step 1: Specialist Cards */
+    .specialist-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2.5rem;
+    }
+
+    .doctor-card-premium {
+        background: rgba(30, 41, 59, 0.4);
+        backdrop-filter: blur(24px);
+        border: 1px solid var(--glass-border);
+        border-radius: 32px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: pointer;
+        position: relative;
+        max-width: 400px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .doctor-card-premium:hover {
+        transform: translateY(-10px);
+        border-color: var(--booking-accent);
+        box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+    }
+
+    .doctor-card-premium.selected {
+        border: 2px solid var(--booking-accent);
+        background: rgba(14, 165, 233, 0.05);
+    }
+
+    .doc-img-wrapper {
+        aspect-ratio: 4 / 3;
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .doc-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+        transition: transform 0.6s;
+    }
+
+    .doctor-card-premium:hover .doc-img-wrapper img { transform: scale(1.1); }
+
+    .doc-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        backdrop-filter: blur(10px);
+    }
+
+    .badge-available { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+    .badge-busy { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
+
+    .doc-info-p {
+        padding: 2rem;
+    }
+
+    .doc-info-p h3 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 0.3rem;
+        color: var(--text-primary);
+    }
+
+    .doc-info-p p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .doc-meta-p {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    .doc-meta-p span {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+    }
+
+    /* Step 2: Slot Selection */
+    .slot-selection-v2 {
+        background: rgba(30, 41, 59, 0.4);
+        backdrop-filter: blur(24px);
+        border: 1px solid var(--glass-border);
+        border-radius: 40px;
+        padding: 4rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-group-p {
+        margin-bottom: 2.5rem;
+    }
+
+    .form-group-p label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
+    }
+
+
+    /* Navigation Buttons */
+    .booking-nav-btns {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 5rem;
+    }
+
+    .nav-btn-p {
+        padding: 1.2rem 3rem;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-next {
+        background: linear-gradient(135deg, var(--booking-accent), #6366f1);
+        color: white;
+        border: none;
+        box-shadow: 0 15px 30px rgba(14, 165, 233, 0.3);
+    }
+
+    .btn-next:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(14, 165, 233, 0.4); }
+
+    .btn-prev {
+        background: transparent;
+        border: 1px solid var(--glass-border);
+        color: var(--text-primary);
+    }
+
+    .btn-prev:hover { background: rgba(255,255,255,0.05); }
+
+    /* Success View */
+    .success-card-p {
+        text-align: center;
+        padding: 5rem;
+        background: rgba(34, 197, 94, 0.05);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        border-radius: 40px;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .success-icon-p {
+        width: 100px;
+        height: 100px;
+        background: #22c55e;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 3rem;
+        color: white;
+        margin: 0 auto 2.5rem;
+        box-shadow: 0 20px 40px rgba(34, 197, 94, 0.3);
+    }
+
+    body.light-theme .doctor-card-premium,
+    body.light-theme .slot-selection-v2 {
+        background: rgba(255, 255, 255, 0.7);
+    }
+</style>
+
+<div class="booking-page-container">
+    <div class="booking-header">
+        <h1 data-i18n="nav_appointments">Book Appointment</h1>
+        <p style="color: var(--text-secondary); font-size: 1.2rem;">Experience world-class healthcare with intelligent scheduling.</p>
+    </div>
+
+    <!-- Stepper -->
+    <div class="booking-stepper">
+        <div class="step-item active" id="step-1-indicator">
+            <div class="step-number">1</div>
+            <span class="step-label">Specialist</span>
+        </div>
+        <div class="step-item" id="step-2-indicator">
+            <div class="step-number">2</div>
+            <span class="step-label">Schedule</span>
+        </div>
+        <div class="step-item" id="step-3-indicator">
+            <div class="step-number">3</div>
+            <span class="step-label">Confirm</span>
+        </div>
+    </div>
+
+    <!-- Step 1: Select Specialist -->
+    <div class="step-content active" id="step-1-content">
+        <!-- Department Filter -->
+        <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 3rem; flex-wrap: wrap;">
+            <button class="nav-btn-p btn-prev" data-dept-filter="all" onclick="filterDoctors('all', this)" style="padding: 0.6rem 1.5rem; font-size: 0.8rem; border-radius: 12px; border-color: var(--booking-accent); color: var(--booking-accent);">All Specialists</button>
+            <button class="nav-btn-p btn-prev" data-dept-filter="Cardiology" onclick="filterDoctors('Cardiology', this)" style="padding: 0.6rem 1.5rem; font-size: 0.8rem; border-radius: 12px;">Cardiology</button>
+            <button class="nav-btn-p btn-prev" data-dept-filter="Pediatrics" onclick="filterDoctors('Pediatrics', this)" style="padding: 0.6rem 1.5rem; font-size: 0.8rem; border-radius: 12px;">Pediatrics</button>
+            <button class="nav-btn-p btn-prev" data-dept-filter="Neurology" onclick="filterDoctors('Neurology', this)" style="padding: 0.6rem 1.5rem; font-size: 0.8rem; border-radius: 12px;">Neurology</button>
+            <button class="nav-btn-p btn-prev" data-dept-filter="Orthopedics" onclick="filterDoctors('Orthopedics', this)" style="padding: 0.6rem 1.5rem; font-size: 0.8rem; border-radius: 12px;">Orthopedics</button>
+            <button class="nav-btn-p btn-prev" data-dept-filter="Oncology" onclick="filterDoctors('Oncology', this)" style="padding: 0.6rem 1.5rem; font-size: 0.8rem; border-radius: 12px;">Oncology</button>
+            <button class="nav-btn-p btn-prev" data-dept-filter="Dermatology" onclick="filterDoctors('Dermatology', this)" style="padding: 0.6rem 1.5rem; font-size: 0.8rem; border-radius: 12px;">Dermatology</button>
+        </div>
+
+        <div class="specialist-grid">
+            <div class="doctor-card-premium" data-dept="Cardiology" onclick="selectDoctor('Dr_Smith', '👨‍⚕️ Dr. Alexander Smith', 'Cardiology')">
+                <div class="doc-img-wrapper">
+                    <img src="{{ url_for('static', filename='images/dr_smith_cardiology.png') }}" alt="Dr. Smith" onerror="this.src='https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=800&auto=format&fit=crop'">
+                    <div class="doc-badge badge-available">Available</div>
+                </div>
+                <div class="doc-info-p">
+                    <h3>Dr. Alexander Smith</h3>
+                    <p>Chief of Cardiology • 15+ Yrs Exp</p>
+                    <p style="color: var(--booking-accent); font-size: 0.85rem; margin-top: -1rem; margin-bottom: 1.5rem; font-weight: 600;">🕒 Available: 09:00 AM - 04:00 PM</p>
+                    <div class="doc-meta-p">
+                        <span>📍 Floor 2, Room 300</span>
+                        <span style="color: var(--booking-accent);">⭐️ 4.9/5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-card-premium" data-dept="Neurology" onclick="selectDoctor('Dr_Vance', '👩‍⚕️ Dr. Elena Vance', 'Neurology')">
+                <div class="doc-img-wrapper">
+                    <img src="{{ url_for('static', filename='images/dr_vance_neurology.png') }}" alt="Dr. Vance" onerror="this.src='https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=800&auto=format&fit=crop'">
+                    <div class="doc-badge badge-available">Available</div>
+                </div>
+                <div class="doc-info-p">
+                    <h3>Dr. Elena Vance</h3>
+                    <p>Neurology Specialist • 10+ Yrs Exp</p>
+                    <p style="color: var(--booking-accent); font-size: 0.85rem; margin-top: -1rem; margin-bottom: 1.5rem; font-weight: 600;">🕒 Available: 10:00 AM - 06:00 PM</p>
+                    <div class="doc-meta-p">
+                        <span>📍 Floor 2, Room 402</span>
+                        <span style="color: var(--booking-accent);">⭐️ 4.8/5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-card-premium" data-dept="Pediatrics" onclick="selectDoctor('Dr_Jones', '👩‍⚕️ Dr. Sarah Jones', 'Pediatrics')">
+                <div class="doc-img-wrapper">
+                    <img src="{{ url_for('static', filename='images/dr_jones_pediatrics.png') }}" alt="Dr. Jones" onerror="this.src='https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=800&auto=format&fit=crop'">
+                    <div class="doc-badge badge-busy">In Surgery</div>
+                </div>
+                <div class="doc-info-p">
+                    <h3>Dr. Sarah Jones</h3>
+                    <p>Senior Pediatrician • 12+ Yrs Exp</p>
+                    <p style="color: #fb7185; font-size: 0.85rem; margin-top: -1rem; margin-bottom: 1.5rem; font-weight: 600;">🕒 Next Available: Tomorrow, 08:00 AM</p>
+                    <div class="doc-meta-p">
+                        <span>📍 Floor 1, Room 500</span>
+                        <span style="color: var(--booking-accent);">⭐️ 5.0/5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-card-premium" data-dept="Orthopedics" onclick="selectDoctor('Dr_Thorne', '👨‍⚕️ Dr. Marcus Thorne', 'Orthopedics')">
+                <div class="doc-img-wrapper">
+                    <img src="{{ url_for('static', filename='images/dr_thorne_orthopedics.png') }}" alt="Dr. Thorne" onerror="this.src='https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=800&auto=format&fit=crop'">
+                    <div class="doc-badge badge-available">Available</div>
+                </div>
+                <div class="doc-info-p">
+                    <h3>Dr. Marcus Thorne</h3>
+                    <p>Orthopedic Surgeon • 14+ Yrs Exp</p>
+                    <p style="color: var(--booking-accent); font-size: 0.85rem; margin-top: -1rem; margin-bottom: 1.5rem; font-weight: 600;">🕒 Available: 08:00 AM - 02:00 PM</p>
+                    <div class="doc-meta-p">
+                        <span>📍 Floor 1, Room 210</span>
+                        <span style="color: var(--booking-accent);">⭐️ 4.9/5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-card-premium" data-dept="Oncology" onclick="selectDoctor('Dr_Chen', '👩‍⚕️ Dr. Sarah Chen', 'Oncology')">
+                <div class="doc-img-wrapper">
+                    <img src="{{ url_for('static', filename='images/dr_chen_oncology.png') }}" alt="Dr. Chen" onerror="this.src='https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=800&auto=format&fit=crop'">
+                    <div class="doc-badge badge-available">Available</div>
+                </div>
+                <div class="doc-info-p">
+                    <h3>Dr. Sarah Chen</h3>
+                    <p>Senior Oncologist • 18+ Yrs Exp</p>
+                    <p style="color: var(--booking-accent); font-size: 0.85rem; margin-top: -1rem; margin-bottom: 1.5rem; font-weight: 600;">🕒 Available: 11:00 AM - 05:00 PM</p>
+                    <div class="doc-meta-p">
+                        <span>📍 Floor 3, Room 850</span>
+                        <span style="color: var(--booking-accent);">⭐️ 4.9/5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-card-premium" data-dept="Neurology" onclick="selectDoctor('Dr_Wilson', '👨‍⚕️ Dr. James Wilson', 'Neurology')">
+                <div class="doc-img-wrapper">
+                    <img src="{{ url_for('static', filename='images/dr_wilson_neurology.png') }}" alt="Dr. Wilson" onerror="this.src='https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=800&auto=format&fit=crop'">
+                    <div class="doc-badge badge-available">Available</div>
+                </div>
+                <div class="doc-info-p">
+                    <h3>Dr. James Wilson</h3>
+                    <p>Neurology Specialist • 20+ Yrs Exp</p>
+                    <p style="color: var(--booking-accent); font-size: 0.85rem; margin-top: -1rem; margin-bottom: 1.5rem; font-weight: 600;">🕒 Available: 09:30 AM - 03:30 PM</p>
+                    <div class="doc-meta-p">
+                        <span>📍 Floor 3, Room 150</span>
+                        <span style="color: var(--booking-accent);">⭐️ 4.8/5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-card-premium" data-dept="Orthopedics" onclick="selectDoctor('Dr_Blunt', '👩‍⚕️ Dr. Emily Blunt', 'Orthopedics')">
+                <div class="doc-img-wrapper">
+                    <img src="{{ url_for('static', filename='images/dr_blunt_orthopedics.png') }}" alt="Dr. Blunt" onerror="this.src='https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=800&auto=format&fit=crop'">
+                    <div class="doc-badge badge-available">Available</div>
+                </div>
+                <div class="doc-info-p">
+                    <h3>Dr. Emily Blunt</h3>
+                    <p>Orthopedic Surgeon • 10+ Yrs Exp</p>
+                    <p style="color: var(--booking-accent); font-size: 0.85rem; margin-top: -1rem; margin-bottom: 1.5rem; font-weight: 600;">🕒 Available: 10:30 AM - 06:00 PM</p>
+                    <div class="doc-meta-p">
+                        <span>📍 Floor 1, Room 1200</span>
+                        <span style="color: var(--booking-accent);">⭐️ 4.7/5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-card-premium" data-dept="Dermatology" onclick="selectDoctor('Dr_Ross', '👨‍⚕️ Dr. Michael Ross', 'Dermatology')">
+                <div class="doc-img-wrapper">
+                    <img src="{{ url_for('static', filename='images/dr_ross_dermatology.png') }}" alt="Dr. Ross" onerror="this.src='https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=800&auto=format&fit=crop'">
+                    <div class="doc-badge badge-available">Available</div>
+                </div>
+                <div class="doc-info-p">
+                    <h3>Dr. Michael Ross</h3>
+                    <p>Dermatologist • 12+ Yrs Exp</p>
+                    <p style="color: var(--booking-accent); font-size: 0.85rem; margin-top: -1rem; margin-bottom: 1.5rem; font-weight: 600;">🕒 Available: 08:00 AM - 12:00 PM</p>
+                    <div class="doc-meta-p">
+                        <span>📍 Ground Floor, Room 1200</span>
+                        <span style="color: var(--booking-accent);">⭐️ 4.8/5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-card-premium" data-dept="General" onclick="selectDoctor('General', '🩺 General Physician', 'Outpatient')">
+                <div class="doc-img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?q=80&w=800&auto=format&fit=crop" alt="General Physician">
+                    <div class="doc-badge badge-available">Walk-ins</div>
+                </div>
+                <div class="doc-info-p">
+                    <h3>General Physician</h3>
+                    <p>Internal Medicine • Outpatient Services</p>
+                    <p style="color: var(--booking-accent); font-size: 0.85rem; margin-top: -1rem; margin-bottom: 1.5rem; font-weight: 600;">🕒 Available: 24/7 (Walk-ins)</p>
+                    <div class="doc-meta-p">
+                        <span>📍 Ground Floor, Wing B</span>
+                        <span style="color: var(--booking-accent);">⭐️ 4.7/5</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin-added doctors rendered dynamically -->
+        <div class="specialist-grid" id="dynamic-doctors-grid" style="margin-top: 2rem; display:none;"></div>
+    </div>
+
+    <!-- Step 2: Schedule Slot -->
+
+    <div class="step-content" id="step-2-content">
+        <div class="slot-selection-v2">
+            <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 3rem; text-align: center;">Choose Your Slot</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="form-group-p">
+                    <label>Consultation Date</label>
+                    <input type="date" id="app-date" class="booking-input" required>
+                </div>
+                <div class="form-group-p">
+                    <label>Preferred Time</label>
+                    <select id="app-time" class="booking-input">
+                        <option value="08:00 AM">08:00 AM</option>
+                        <option value="08:30 AM">08:30 AM</option>
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="09:30 AM">09:30 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="10:30 AM">10:30 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="11:30 AM">11:30 AM</option>
+                        <option value="12:00 PM">12:00 PM</option>
+                        <option value="12:30 PM">12:30 PM</option>
+                        <option value="02:00 PM">02:00 PM</option>
+                        <option value="02:30 PM">02:30 PM</option>
+                        <option value="03:00 PM">03:00 PM</option>
+                        <option value="03:30 PM">03:30 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="04:30 PM">04:30 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                        <option value="05:30 PM">05:30 PM</option>
+                        <option value="06:00 PM">06:00 PM</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group-p">
+                <label>Reason for Consultation</label>
+                <textarea id="app-reason" class="booking-input" style="min-height: 120px; resize: none;" placeholder="Briefly describe your medical concern..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Confirmation -->
+    <div class="step-content" id="step-3-content">
+        <div class="slot-selection-v2" style="max-width: 600px;">
+            <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 3rem; text-align: center;">Contact Verification</h2>
+            <div class="form-group-p">
+                <label>Secure Email</label>
+                <input type="email" id="user-email" class="booking-input" placeholder="john@example.com">
+            </div>
+            <div class="form-group-p">
+                <label>Phone Number</label>
+                <input type="tel" id="user-phone" class="booking-input" placeholder="+1 (555) 000-0000">
+            </div>
+            <div style="background: rgba(14, 165, 233, 0.05); padding: 1.5rem; border-radius: 20px; margin-top: 1rem; border: 1px dashed var(--booking-accent);">
+                <p style="font-size: 0.85rem; color: var(--text-secondary); text-align: center;">
+                    By confirming, you agree to our <a href="#" style="color: var(--booking-accent); font-weight: 800;">Terms of Care</a> and Privacy Policy.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success View -->
+    <div class="step-content" id="success-content">
+        <div class="success-card-p">
+            <div class="success-icon-p">✓</div>
+            <h2 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 1rem; color: var(--text-primary);">Booking Confirmed!</h2>
+            <p id="booking-summary-v2" style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6; margin-bottom: 3rem;"></p>
+            
+            <div style="display: flex; gap: 1.5rem; justify-content: center;">
+                <a id="nav-to-room" href="#" class="nav-btn-p btn-next" style="text-decoration: none;">🗺️ Get Directions</a>
+                <a href="{{ url_for('portal') }}" class="nav-btn-p btn-prev" style="text-decoration: none;">👤 View in Portal</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="booking-nav-btns" id="booking-nav">
+        <button onclick="prevStep()" class="nav-btn-p btn-prev" id="prev-btn" style="display: none;">Back</button>
+        <button onclick="nextStep()" class="nav-btn-p btn-next" id="next-btn">Continue &rarr;</button>
+    </div>
+</div>
+
+<script>
+    let state = {
+        currentStep: 1,
+        selectedDocId: '',
+        selectedDocName: '',
+        selectedDept: ''
+    };
+
+    function setStep(step) {
+        console.log('Setting step to:', step);
+        try {
+            state.currentStep = step;
+            
+            // 1. Update Content Visibility
+            const contents = document.querySelectorAll('.step-content');
+            contents.forEach(c => {
+                c.classList.remove('active');
+                c.style.display = 'none';
+            });
+            
+            const activeContent = document.getElementById(`step-${step}-content`);
+            if (activeContent) {
+                activeContent.classList.add('active');
+                activeContent.style.display = 'block';
+            } else if (step === 4) { // Success view
+                const successContent = document.getElementById('success-content');
+                if (successContent) {
+                    successContent.classList.add('active');
+                    successContent.style.display = 'block';
+                }
+            }
+
+            // 2. Update Stepper Indicators
+            const indicators = document.querySelectorAll('.step-item');
+            indicators.forEach((item, idx) => {
+                const stepNum = idx + 1;
+                item.classList.toggle('active', stepNum === step);
+                item.classList.toggle('completed', stepNum < step);
+            });
+
+            // 3. Update Navigation Buttons
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const navArea = document.getElementById('booking-nav');
+            const stepper = document.querySelector('.booking-stepper');
+
+            if (step >= 4) {
+                if (navArea) navArea.style.display = 'none';
+                if (stepper) stepper.style.display = 'none';
+            } else {
+                if (navArea) navArea.style.display = 'flex';
+                if (stepper) stepper.style.display = 'flex';
+                if (prevBtn) prevBtn.style.display = step === 1 ? 'none' : 'block';
+                if (nextBtn) nextBtn.innerHTML = step === 3 ? 'Confirm Booking' : 'Continue &rarr;';
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (err) {
+            console.error('UI Update Error:', err);
+        }
+    }
+
+    function selectDoctor(id, name, dept) {
+        state.selectedDocId = id;
+        state.selectedDocName = name;
+        state.selectedDept = dept;
+
+        // Highlight selection
+        document.querySelectorAll('.doctor-card-premium').forEach(c => c.classList.remove('selected'));
+        const selectedCard = document.querySelector(`.doctor-card-premium[onclick*="${id}"]`);
+        if (selectedCard) selectedCard.classList.add('selected');
+
+        // Check slot availability for the selected doctor
+        checkSlotsAvailability();
+
+        // Auto move to next step
+        setTimeout(() => setStep(2), 300);
+    }
+
+    function filterDoctors(dept, el) {
+        document.querySelectorAll('.doctor-card-premium').forEach(card => {
+            const cardDept = card.getAttribute('data-dept');
+            if (dept === 'all' || cardDept === dept) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        if (el && el.parentElement) {
+            el.parentElement.querySelectorAll('button').forEach(btn => {
+                btn.style.borderColor = 'var(--glass-border)';
+                btn.style.color = 'var(--text-primary)';
+            });
+            el.style.borderColor = 'var(--booking-accent)';
+            el.style.color = 'var(--booking-accent)';
+        }
+    }
+
+    function nextStep() {
+        if (state.currentStep === 1 && !state.selectedDocId) {
+            showToast('⚠️ Please select a specialist first.', 'error');
+            return;
+        }
+        if (state.currentStep === 2) {
+            const date = document.getElementById('app-date').value;
+            if (!date) {
+                showToast('⚠️ Please select a consultation date.', 'error');
+                return;
+            }
+        }
+        if (state.currentStep === 3) {
+            finalizeBooking();
+            return;
+        }
+        setStep(state.currentStep + 1);
+    }
+
+    function prevStep() {
+        if (state.currentStep > 1) {
+            setStep(state.currentStep - 1);
+        }
+    }
+
+    function finalizeBooking() {
+        const date = document.getElementById('app-date').value;
+        const time = document.getElementById('app-time').value;
+        const email = document.getElementById('user-email').value;
+        const phone = document.getElementById('user-phone').value;
+        const reason = document.getElementById('app-reason').value;
+
+        if (!email || !phone) {
+            showToast('⚠️ Please provide contact details.', 'error');
+            return;
+        }
+
+        const bookingId = 'BK-' + Math.floor(100000 + Math.random() * 900000);
+        
+        const appts = JSON.parse(localStorage.getItem('hospnav_appointments') || '[]');
+        appts.push({
+            id: bookingId,
+            doctor: state.selectedDocName,
+            date, time, email, phone, reason,
+            docId: state.selectedDocId,
+            timestamp: new Date().toISOString()
+        });
+        localStorage.setItem('hospnav_appointments', JSON.stringify(appts));
+
+        // Sync phone number to Patient Portal Vault
+        const patients = JSON.parse(localStorage.getItem('hospnav_patients_vault') || '{}');
+        if (!patients[email]) {
+            patients[email] = { email: email, name: '', phone: phone, id: 'P-' + Math.floor(1000 + Math.random() * 8999) };
+        } else {
+            patients[email].phone = phone;
+        }
+        localStorage.setItem('hospnav_patients_vault', JSON.stringify(patients));
+
+        document.getElementById('booking-summary-v2').innerHTML = `
+            Consultation with <strong>${state.selectedDocName}</strong><br>
+            Scheduled for <strong>${date}</strong> at <strong>${time}</strong>.<br><br>
+            <span style="display: inline-block; background: rgba(14, 165, 233, 0.1); padding: 0.5rem 1rem; border-radius: 10px; border: 1px dashed var(--booking-accent); color: var(--text-primary); margin-bottom: 1rem;">
+                Booking Number: <strong style="color: var(--booking-accent); letter-spacing: 1px;">${bookingId}</strong>
+            </span><br>
+            We've sent the secure access details to <em>${email}</em>.
+        `;
+
+        const navLink = document.getElementById('nav-to-room');
+        const targets = { 'General': 'Outpatient', 'Dr_Vance': 'MRI_Suite', 'Dr_Thorne': 'Ward_A' };
+        navLink.href = `/navigation?target=${targets[state.selectedDocId] || state.selectedDocId}`;
+
+        setStep(4);
+        showToast('✅ Appointment Secured!', 'info');
+    }
+
+    function checkSlotsAvailability() {
+        const dateInput = document.getElementById('app-date');
+        const timeSelect = document.getElementById('app-time');
+        if (!dateInput || !timeSelect || !state.selectedDocName) return;
+
+        const selectedDate = dateInput.value;
+        if (!selectedDate) return;
+
+        const appts = JSON.parse(localStorage.getItem('hospnav_appointments') || '[]');
+        const bookedTimes = appts
+            .filter(a => a.doctor === state.selectedDocName && a.date === selectedDate)
+            .map(a => a.time);
+
+        Array.from(timeSelect.options).forEach(opt => {
+            const rawVal = opt.value;
+            const isBooked = bookedTimes.includes(rawVal);
+
+            if (isBooked) {
+                opt.disabled = true;
+                if (!opt.text.endsWith(' (Booked)')) {
+                    opt.text = `${rawVal} (Booked)`;
+                }
+            } else {
+                opt.disabled = false;
+                opt.text = rawVal;
+            }
+        });
+
+        // Auto select first available slot if currently selected option is now disabled
+        if (timeSelect.selectedOptions[0] && timeSelect.selectedOptions[0].disabled) {
+            const firstAvail = Array.from(timeSelect.options).find(opt => !opt.disabled);
+            if (firstAvail) {
+                timeSelect.value = firstAvail.value;
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Enforce today's date or newer
+        const dateInput = document.getElementById('app-date');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+            if (!dateInput.value) dateInput.value = today;
+
+            // Check availability when date changes
+            dateInput.addEventListener('change', checkSlotsAvailability);
+        }
+
+        // Handle pre-selected department
+        setTimeout(() => {
+            const dept = new URLSearchParams(window.location.search).get('dept');
+            if (dept) {
+                const btn = document.querySelector(`button[data-dept-filter="${dept}"]`);
+                if (btn) btn.click();
+            }
+        }, 300);
+
+        // Pre-fill user data
+        const email = localStorage.getItem('hospnav_patient_session');
+        if (email) {
+            document.getElementById('user-email').value = email;
+            const patients = JSON.parse(localStorage.getItem('hospnav_patients_vault') || '{}');
+            if (patients[email]) document.getElementById('user-phone').value = patients[email].phone || '';
+        }
+        
+        setStep(1); // Initialize UI
+
+        // ── Load admin-added doctors from localStorage ──
+        renderDynamicDoctors();
+    });
+
+    function renderDynamicDoctors() {
+        const grid = document.getElementById('dynamic-doctors-grid');
+        if (!grid) return;
+
+        const allDoctors = JSON.parse(localStorage.getItem('hospnav_doctors') || '[]');
+        // The default 9 doctors are already in static HTML — show only extras added by admin
+        const defaultIds = ['DR-001','DR-002','DR-003','DR-004','DR-005','DR-006','DR-007','DR-008','DR-009'];
+        const extra = allDoctors.filter(d => !defaultIds.includes(d.id) && d.status === 'active');
+
+        if (extra.length === 0) { grid.style.display = 'none'; return; }
+        grid.style.display = 'grid';
+
+        grid.innerHTML = extra.map(d => {
+            const safeId = d.id.replace(/[^a-zA-Z0-9]/g, '_');
+            const displayName = d.name.startsWith('Dr.') ? d.name : 'Dr. ' + d.name;
+            return `
+            <div class="doctor-card-premium" data-dept="${d.spec}" onclick="selectDoctor('${safeId}', '${d.avatar || '👨\u200d⚕️'} ${displayName}', '${d.spec}')">
+                <div class="doc-img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=800&auto=format&fit=crop" alt="${displayName}" onerror="this.src='https://images.unsplash.com/photo-1537368910025-700350fe46c7?q=80&w=800&auto=format&fit=crop'">
+                    <div class="doc-badge badge-available">${d.status === 'active' ? 'Available' : 'On Leave'}</div>
+                </div>
+                <div class="doc-info-p">
+                    <h3>${displayName}</h3>
+                    <p>${d.spec} Specialist • ${d.exp || 'N/A'} Exp</p>
+                    <p style="color: var(--booking-accent); font-size: 0.85rem; margin-top: -1rem; margin-bottom: 1.5rem; font-weight: 600;">🕒 Available: 09:00 AM - 05:00 PM</p>
+                    <div class="doc-meta-p">
+                        <span>📍 See Reception</span>
+                        <span style="color: var(--booking-accent);">⭐️ 4.8/5</span>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+        // Also add the new specialties to the filter bar if not already present
+        const filterBar = document.querySelector('[data-dept-filter="all"]').parentElement;
+        extra.forEach(d => {
+            if (!filterBar.querySelector(`[data-dept-filter="${d.spec}"]`)) {
+                const btn = document.createElement('button');
+                btn.className = 'nav-btn-p btn-prev';
+                btn.setAttribute('data-dept-filter', d.spec);
+                btn.setAttribute('onclick', `filterDoctors('${d.spec}', this)`);
+                btn.style.cssText = 'padding:0.6rem 1.5rem;font-size:0.8rem;border-radius:12px;';
+                btn.textContent = d.spec;
+                filterBar.appendChild(btn);
+            }
+        });
+    }
+
+</script>
+{% endblock %}
