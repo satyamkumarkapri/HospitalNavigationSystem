@@ -802,7 +802,7 @@ async function calculatePath(isEmergency = false, forceShowDirections = false) {
             
         } else {
             renderDirections(result.directions, forceShowDirections, result.f_g_h_values);
-            updateStats(result.path, result.explored.length, result.total_cost, algo, wheelchair, false);
+            updateStats(result.path, result.explored.length, result.total_cost, algo, wheelchair, false, result);
             await animatePathfinding(result.explored, result.path, isEmergency);
             selectNode(endNode, false);
         }
@@ -1166,6 +1166,12 @@ function updateStats(path, exploredLen, totalCost, algo, wheelchair, isMulti = f
         document.getElementById('stat-explored').textContent = exploredLen;
         document.getElementById('stat-dist').textContent = `${totalCost} units`;
         document.getElementById('stat-algo').textContent = algo;
+        if(result && result.metrics) {
+            const memoryEl = document.getElementById('stat-memory');
+            const runtimeEl = document.getElementById('stat-runtime');
+            if(memoryEl) memoryEl.textContent = `${result.metrics.peak_memory_kb.toFixed(2)} KB`;
+            if(runtimeEl) runtimeEl.textContent = `${result.metrics.runtime_ms} ms`;
+        }
         let eta = (path.length - 1) * 2;
         if (wheelchair) eta = Math.ceil(eta * 1.5);
         if (eta < 1) eta = 1;

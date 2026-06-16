@@ -30,6 +30,8 @@ const TRANSLATIONS = {
     ucs: "Uniform Cost Search (Optimal)",
     bfs: "Breadth-First Search (Fewest Hops)",
     dfs: "Depth-First Search (Experimental)",
+    expectimax: "Expectimax (Stochastic Wait Times)",
+    alphabeta: "Alpha-Beta Pruning (Worst-Case Evacuation)",
     calculating: "⏳ Calculating...",
     home_hero_title: "Compassionate Care, Guided by AI.",
     home_hero_subtitle: "World-class medical facilities equipped with state-of-the-art intelligent navigation.",
@@ -146,6 +148,8 @@ const TRANSLATIONS = {
     greedy: "लालची बेस्ट-फ़र्स्ट (केवल अनुमानी)",
     ucs: "समान लागत खोज",
     bfs: "ब्रेड्थ-फर्स्ट खोज", dfs: "डेप्थ-फर्स्ट खोज",
+    expectimax: "तर्कसंगत निर्णय (Expectimax)",
+    alphabeta: "अल्फा-बीटा प्रूनिंग (Alphabeta)",
     calculating: "⏳ गणना हो रही है...",
     home_hero_title: "करुणामय देखभाल, AI द्वारा निर्देशित।",
     home_hero_subtitle: "अत्याधुनिक बुद्धिमान नेविगेशन से लैस विश्व स्तरीय चिकित्सा सुविधाएं।",
@@ -224,7 +228,7 @@ const TRANSLATIONS = {
     cta_title: "क्या आप बेहतर देखभाल का अनुभव करने के लिए तैयार हैं?",
     cta_desc: "आज ही अपना अपॉइंटमेंट बुक करें या हमारे बुद्धिमान नेविगेशन सिस्टम को आज़माएँ।",
     staff_login_title: "स्टाफ टर्मिनल",
-    staff_login_desc: "नैदानिक प्रबंधन प्रणालियों तक पहुँचने के लिए अधिकृत करें।",
+    staff_login_desc: "नैदानिक प्रबंधन प्रणालियों तक पहुँचने के लिए अधिकृत करें",
     auth_email: "संस्थागत ईमेल",
     auth_pass: "सुरक्षा क्रेडेंशियल",
     portal_appointments: "नैदानिक अनुसूची",
@@ -260,6 +264,8 @@ const TRANSLATIONS = {
     greedy: "Búsqueda Voraz (Solo Heurística)",
     ucs: "Costo Uniforme (Óptima)",
     bfs: "Búsqueda en Anchura", dfs: "Búsqueda en Profundidad",
+    expectimax: "Expectimax (Tiempos de Espera)",
+    alphabeta: "Alpha-Beta (Evacuación)",
     calculating: "⏳ Calculando...",
   },
   fr: {
@@ -287,6 +293,8 @@ const TRANSLATIONS = {
     greedy: "Recherche Gloutonne (Heuristique Seule)",
     ucs: "Coût Uniforme (Optimale)",
     bfs: "Recherche en Largeur", dfs: "Recherche en Profondeur",
+    expectimax: "Expectimax (Attente Stochastique)",
+    alphabeta: "Alpha-Beta (Évacuation)",
     calculating: "⏳ Calcul en cours...",
   },
   ar: {
@@ -314,6 +322,8 @@ const TRANSLATIONS = {
     greedy: "البحث الجشع (الاستدلال فقط)",
     ucs: "بحث التكلفة الموحدة",
     bfs: "البحث بالعرض", dfs: "البحث بالعمق",
+    expectimax: "توقع الحد الأقصى (أوقات الانتظار العشوائية)",
+    alphabeta: "تقليم ألفا بيتا (أسوأ سيناريو للإخلاء)",
     calculating: "⏳ جارٍ الحساب...",
   },
   zh: {
@@ -340,7 +350,10 @@ const TRANSLATIONS = {
     idastar: "IDA* Search Algorithm",
     greedy: "贪婪最佳优先搜索（仅启发式）",
     ucs: "统一代价搜索（最优）",
-    bfs: "广度优先搜索", dfs: "深度优先搜索",
+    bfs: "广度优先搜索 (最少跳数)",
+    dfs: "深度优先搜索 (实验性)",
+    expectimax: "Expectimax (随机等待时间)",
+    alphabeta: "Alpha-Beta 剪枝 (最坏情况疏散)",
     calculating: "⏳ 计算中...",
   },
   de: {
@@ -406,8 +419,8 @@ function _updateAlgoSelect() {
   var sel = document.getElementById('algo-select');
   if (!sel) return;
   var curVal = sel.value;
-  var keys = ['astar', 'idastar', 'greedy', 'ucs', 'bfs', 'dfs'];
-  var vals = ['ASTAR', 'IDASTAR', 'GREEDY', 'UCS', 'BFS', 'DFS'];
+  var keys = ['astar', 'idastar', 'greedy', 'ucs', 'bfs', 'dfs', 'expectimax', 'alphabeta'];
+  var vals = ['ASTAR', 'IDASTAR', 'GREEDY', 'UCS', 'BFS', 'DFS', 'EXPECTIMAX', 'ALPHABETA'];
   sel.innerHTML = '';
   keys.forEach(function(k, i) {
     var opt = document.createElement('option');

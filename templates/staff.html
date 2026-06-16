@@ -373,6 +373,9 @@
                     <button class="nav-btn admin-only-nav" onclick="changeTab('doctors')" id="side-doc-link" style="display:none">
                         <span>🩺</span> Doctor Management
                     </button>
+                    <button class="nav-btn admin-only-nav" onclick="changeTab('schedule')" id="side-schedule-link" style="display:none">
+                        <span>🗓️</span> Auto Scheduler
+                    </button>
                     <button class="nav-btn admin-only-nav" onclick="changeTab('stats')" style="display:none">
                         <span>📊</span> Analytics
                     </button>
@@ -437,6 +440,18 @@
                         <button onclick="openDoctorModal()" class="hero-cta-btn" style="border:none;cursor:pointer;padding:0.9rem 2rem;font-size:0.95rem;background:linear-gradient(135deg,var(--staff-accent),#a855f7);">+ Add Doctor</button>
                     </div>
                     <div id="doctors-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;"></div>
+                </div>
+
+                
+                <!-- Scheduler Pane (Admin only) -->
+                <div id="pane-schedule" class="tab-pane">
+                    <div class="content-header">
+                        <div class="header-text"><h1>AI Staff Scheduler</h1><p>CSP Backtracking Engine with MRV & LCV heuristics.</p></div>
+                        <button onclick="generateSchedule()" class="hero-cta-btn" style="border:none;cursor:pointer;padding:0.9rem 2rem;font-size:0.95rem;background:linear-gradient(135deg,var(--staff-accent),#a855f7);">⚡ Run Auto Scheduler</button>
+                    </div>
+                    <div id="schedule-results" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;">
+                        <p style="color:var(--text-secondary);">Click "Run Auto Scheduler" to assign doctors to rooms and shifts without conflicts.</p>
+                    </div>
                 </div>
 
                 <!-- Stats Pane (Admin only) -->
@@ -748,6 +763,32 @@
                     </div>
                 </div>`;
             }).join('');
+        }
+    }
+
+    
+    async function generateSchedule() {
+        const resDiv = document.getElementById('schedule-results');
+        resDiv.innerHTML = '<p style="color:var(--staff-accent);">Generating schedule...</p>';
+        try {
+            const response = await fetch('/api/schedule');
+            const data = await response.json();
+            if(data.success) {
+                let html = '';
+                for(const [doc, assignment] of Object.entries(data.schedule)) {
+                    html += `
+                    <div style="background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:24px;padding:2rem;">
+                        <h4 style="font-size:1.1rem;font-weight:800;color:var(--text-primary);margin-bottom:0.5rem;">${doc.replace('_', ' ')}</h4>
+                        <p style="font-size:0.85rem;color:var(--staff-accent);font-weight:700;">${assignment.shift}</p>
+                        <p style="font-size:0.85rem;color:var(--text-secondary);">📍 ${assignment.room}</p>
+                    </div>`;
+                }
+                resDiv.innerHTML = html;
+            } else {
+                resDiv.innerHTML = `<p style="color:#f43f5e;">Error: ${data.error}</p>`;
+            }
+        } catch(err) {
+            resDiv.innerHTML = `<p style="color:#f43f5e;">Error: ${err}</p>`;
         }
     }
 

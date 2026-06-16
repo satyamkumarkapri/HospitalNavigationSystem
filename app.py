@@ -2,8 +2,15 @@ from flask import Flask, render_template, jsonify, request
 import heapq
 from collections import deque
 import math
+import time
+import sys
+import random
+from typing import Dict, List, Any, Tuple, Optional
+from dataclasses import dataclass, field
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 # Hospital Graph — multi-floor, AI-powered navigation
 # Each node: x, y (SVG coords), floor, connections {neighbor: weight},
@@ -205,7 +212,7 @@ HOSPITAL_MAP = {
     # ─── FLOOR 1 (First) ──────────────────────────────────────────
     "Lift_1": {
         "x": 750, "y": 660, "floor": 1,
-        "connections": {"Lift_G": 3, "Lift_2": 3, "Lift_3": 6, "Radiology": 5, "Lab": 7, "Restroom_1": 4, "Cardiology_Lab": 5},
+        "connections": {"Lift_G": 3, "Lift_2": 3, "Lift_3": 6, "Radiology": 5, "Lab": 7, "Restroom_1": 4},
         "info": "Floor 1 Lift Landing. Connects to Radiology, Lab, and upper floors.",
         "icon": "🛗", "wheelchair_accessible": True, "category": "Access",
         "status": "open", "hours": "24/7"
@@ -314,7 +321,7 @@ HOSPITAL_MAP = {
     "Lift_2": {
         "x": 750, "y": 660, "floor": 2,
         "connections": {"Lift_1": 3, "Lift_G": 6, "Lift_3": 3, "Ward_A": 5, "Ward_B": 7,
-                        "Nursing_Station_2": 4, "Recovery_Room": 5, "Counseling_Room": 6},
+                        "Nursing_Station_2": 4},
         "info": "Floor 2 Lift Landing A. Wards, Surgery, and Maternity.",
         "icon": "🛗", "wheelchair_accessible": True, "category": "Access",
         "status": "open", "hours": "24/7"
@@ -328,7 +335,7 @@ HOSPITAL_MAP = {
     },
     "Stairwell_2": {
         "x": 750, "y": 510, "floor": 2,
-        "connections": {"Stairwell_1": 2, "Ward_A": 6, "Pre_Op": 4},
+        "connections": {"Stairwell_1": 2, "Ward_A": 6},
         "info": "Floor 2 East Stairwell.",
         "icon": "🪜", "wheelchair_accessible": False, "category": "Access",
         "status": "open", "hours": "24/7"
@@ -406,7 +413,7 @@ HOSPITAL_MAP = {
     },
     "Surgery": {
         "x": 1650, "y": 450, "floor": 2,
-        "connections": {"Ward_A": 6, "Ward_B": 8, "Pharmacy": 6, "Staff_Lift_2": 3, "Pre_Op": 8},
+        "connections": {"Ward_A": 6, "Ward_B": 8, "Pharmacy": 6, "Staff_Lift_2": 3},
         "info": "Surgery Centre. 6 operating theatres. Pre-op assessment required. Restricted access.",
         "icon": "🔪", "wheelchair_accessible": True, "category": "Clinical",
         "status": "restricted", "hours": "Operating hours vary — 24/7 emergency"
@@ -571,11 +578,12 @@ def get_dfs_path(start, end, accessible_only=False):
     return None, explored_order
 
 def get_ucs_path(start, end, crowded_paths=[], accessible_only=False, is_emergency=False):
-    pq = [(0, start, [start])]
+    tie = 0
+    pq = [(0, tie, start, [start])]
     visited = {}
     explored_order = []
     while pq:
-        (cost, node, path) = heapq.heappop(pq)
+        (cost, _, node, path) = heapq.heappop(pq)
         if node in visited and visited[node] <= cost:
             continue
         visited[node] = cost
@@ -591,15 +599,17 @@ def get_ucs_path(start, end, crowded_paths=[], accessible_only=False, is_emergen
             prev_node = path[-2] if len(path) > 1 else None
             actual_weight = get_advanced_weight(prev_node, node, neighbor, weight, crowded_paths, is_emergency)
             
-            heapq.heappush(pq, (cost + actual_weight, neighbor, path + [neighbor]))
+            tie += 1
+            heapq.heappush(pq, (cost + actual_weight, tie, neighbor, path + [neighbor]))
     return None, explored_order
 
 def get_astar_path(start, end, crowded_paths=[], accessible_only=False, is_emergency=False):
-    pq = [(heuristic(start, end), 0, start, [start])]
+    tie = 0
+    pq = [(heuristic(start, end), 0, tie, start, [start])]
     visited = {}
     explored_order = []
     while pq:
-        (f, g, node, path) = heapq.heappop(pq)
+        (f, g, _, node, path) = heapq.heappop(pq)
         if node in visited and visited[node] <= g:
             continue
         visited[node] = g
@@ -617,7 +627,8 @@ def get_astar_path(start, end, crowded_paths=[], accessible_only=False, is_emerg
             
             new_g = g + actual_weight
             new_f = new_g + heuristic(neighbor, end)
-            heapq.heappush(pq, (new_f, new_g, neighbor, path + [neighbor]))
+            tie += 1
+            heapq.heappush(pq, (new_f, new_g, tie, neighbor, path + [neighbor]))
     return None, explored_order
 
 def get_greedy_path(start, end, accessible_only=False):
@@ -682,10 +693,11 @@ def get_ida_star_path(start, end, crowded_paths=[], accessible_only=False, is_em
 
 
 def get_shortest_path_cost(start, end, crowded_paths=[], accessible_only=False, is_emergency=False):
-    pq = [(0, start, [start])]
+    tie = 0
+    pq = [(0, tie, start, [start])]
     visited = {}
     while pq:
-        (cost, node, path) = heapq.heappop(pq)
+        (cost, _, node, path) = heapq.heappop(pq)
         if node in visited and visited[node] <= cost:
             continue
         visited[node] = cost
@@ -700,7 +712,8 @@ def get_shortest_path_cost(start, end, crowded_paths=[], accessible_only=False, 
             prev_node = path[-2] if len(path) > 1 else None
             actual_weight = get_advanced_weight(prev_node, node, neighbor, weight, crowded_paths, is_emergency)
             
-            heapq.heappush(pq, (cost + actual_weight, neighbor, path + [neighbor]))
+            tie += 1
+            heapq.heappush(pq, (cost + actual_weight, tie, neighbor, path + [neighbor]))
     return float('inf'), []
 
 def find_minimax_meeting_point(starts, destination, crowded_paths=[], accessible_only=False):
@@ -818,6 +831,199 @@ def build_directions_for_path(path, prefix=""):
         directions.append(step)
     return directions
 
+
+def get_expectimax_path(start, end, crowded_paths=[], accessible_only=False, is_emergency=False, depth_limit=10):
+    # Expectimax considering probabilistic elevator delays or crowd delays
+    def expectimax(node, current_path, current_depth, is_max_node):
+        if node == end:
+            return 0, current_path
+        if current_depth == depth_limit:
+            return heuristic(node, end), current_path
+
+        if is_max_node:
+            best_val = float('inf')
+            best_path = current_path
+            for neighbor, weight in HOSPITAL_MAP[node]["connections"].items():
+                if neighbor in current_path:
+                    continue
+                if accessible_only and not HOSPITAL_MAP[neighbor].get("wheelchair_accessible", True):
+                    continue
+                actual_weight = get_advanced_weight(current_path[-2] if len(current_path)>1 else None, node, neighbor, weight, crowded_paths, is_emergency)
+                val, pth = expectimax(neighbor, current_path + [neighbor], current_depth, False)
+                total_val = val + actual_weight
+                if total_val < best_val:
+                    best_val = total_val
+                    best_path = pth
+            return best_val, best_path
+        else:
+            # Chance node: what if there is a delay?
+            # 80% chance normal weight, 20% chance 15 units delay
+            expected_val = 0
+            val, pth = expectimax(node, current_path, current_depth + 1, True)
+            expected_val = 0.8 * val + 0.2 * (val + 15)
+            return expected_val, pth
+
+    val, path = expectimax(start, [start], 0, True)
+    return path, path # Explored order is just the path for simplicity
+
+def get_alphabeta_path(start, end, crowded_paths=[], accessible_only=False, is_emergency=True, depth_limit=10):
+    # Alpha-Beta Pruning simulating a "Worst-Case Evacuation"
+    # Router (Minimizer of cost) vs Hazard Adversary (Maximizer of cost)
+    def alphabeta(node, current_path, current_depth, alpha, beta, is_router):
+        if node == end:
+            return 0, current_path
+        if current_depth == depth_limit:
+            return heuristic(node, end), current_path
+
+        if is_router:
+            best_val = float('inf') # Router wants to MINIMIZE cost
+            best_path = current_path
+            for neighbor, weight in HOSPITAL_MAP[node]["connections"].items():
+                if neighbor in current_path:
+                    continue
+                if accessible_only and not HOSPITAL_MAP[neighbor].get("wheelchair_accessible", True):
+                    continue
+                
+                actual_weight = get_advanced_weight(current_path[-2] if len(current_path)>1 else None, node, neighbor, weight, crowded_paths, is_emergency)
+                
+                # Turn goes to Adversary
+                val, pth = alphabeta(neighbor, current_path + [neighbor], current_depth + 1, alpha, beta, False)
+                total_val = val + actual_weight
+                
+                if total_val < best_val:
+                    best_val = total_val
+                    best_path = pth
+                    
+                beta = min(beta, best_val)
+                if beta <= alpha:
+                    break # Alpha cut-off
+            return best_val, best_path
+        else:
+            # Adversary chance: Evaluates adding a +20 hazard penalty vs +0 normal routing
+            worst_val = float('-inf') # Adversary wants to MAXIMIZE cost
+            best_path = current_path
+            
+            for delay in [20, 0]:
+                # Turn goes back to Router, depth doesn't increase here since Adversary just modifies current state
+                val, pth = alphabeta(node, current_path, current_depth, alpha, beta, True)
+                total_val = val + delay
+                
+                if total_val > worst_val:
+                    worst_val = total_val
+                    best_path = pth
+                    
+                alpha = max(alpha, worst_val)
+                if beta <= alpha:
+                    break # Beta cut-off
+            return worst_val, best_path
+
+    val, path = alphabeta(start, [start], 0, float('-inf'), float('inf'), True)
+    return path, path
+
+
+# CSP for Doctor Scheduling
+class BacktrackingCSP:
+    def __init__(self, variables, domains, constraints):
+        self.variables = variables
+        self.domains = domains
+        self.constraints = constraints
+
+    def is_consistent(self, var, value, assignment):
+        for constraint in self.constraints:
+            if not constraint(var, value, assignment):
+                return False
+        return True
+
+    def mrv(self, assignment):
+        unassigned = [v for v in self.variables if v not in assignment]
+        return min(unassigned, key=lambda v: len(self.domains[v]))
+
+    def backtrack(self, assignment={}):
+        if len(assignment) == len(self.variables):
+            return assignment
+        var = self.mrv(assignment)
+        for value in self.domains[var]:
+            if self.is_consistent(var, value, assignment):
+                assignment[var] = value
+                result = self.backtrack(assignment)
+                if result:
+                    return result
+                del assignment[var]
+        return None
+
+class MinConflictsCSP:
+    def __init__(self, variables, domains):
+        self.variables = variables
+        self.domains = domains
+
+    def get_conflicts(self, var, value, assignment):
+        conflicts = 0
+        for other_var, other_val in assignment.items():
+            if other_var != var and other_val == value:
+                conflicts += 1
+        return conflicts
+
+    def solve(self, max_steps=1000):
+        # 1. Initial random assignment
+        assignment = {}
+        for var in self.variables:
+            assignment[var] = random.choice(self.domains[var])
+            
+        # 2. Iterate
+        for _ in range(max_steps):
+            conflicted_vars = []
+            for var in self.variables:
+                if self.get_conflicts(var, assignment[var], assignment) > 0:
+                    conflicted_vars.append(var)
+                    
+            if not conflicted_vars:
+                return assignment # No conflicts found, solution is valid
+                
+            var = random.choice(conflicted_vars)
+            
+            min_conflicts = float('inf')
+            best_values = []
+            
+            for value in self.domains[var]:
+                conflicts = self.get_conflicts(var, value, assignment)
+                if conflicts < min_conflicts:
+                    min_conflicts = conflicts
+                    best_values = [value]
+                elif conflicts == min_conflicts:
+                    best_values.append(value)
+                    
+            # Tie-breaking randomly helps escape local minima
+            assignment[var] = random.choice(best_values)
+            
+        return None
+
+# HMM for Tracking
+class HMMTracker:
+    def __init__(self, states):
+        self.states = states
+        # Uniform initial belief
+        self.belief = {s: 1.0/len(states) for s in states}
+
+    def predict(self, transition_model):
+        new_belief = {s: 0 for s in self.states}
+        for s in self.states:
+            for next_s, prob in transition_model(s).items():
+                if next_s in new_belief:
+                    new_belief[next_s] += self.belief[s] * prob
+        self.belief = new_belief
+
+    def update(self, evidence, sensor_model):
+        total = 0
+        for s in self.states:
+            prob = sensor_model(s, evidence)
+            self.belief[s] *= prob
+            total += self.belief[s]
+        if total > 0:
+            for s in self.states:
+                self.belief[s] /= total
+
+tracker = HMMTracker(list(HOSPITAL_MAP.keys()))
+
 # ─── Routes ───────────────────────────────────────────────────────────────────
 @app.route('/')
 def index():
@@ -885,6 +1091,7 @@ def map_data():
 
 @app.route('/find-path', methods=['POST'])
 def find_path():
+    start_time = time.time()
     data = request.json
     persons = data.get('persons')
     
@@ -919,6 +1126,10 @@ def find_path():
             path, explored = get_greedy_path(start, end, accessible_only)
         elif algo == 'IDASTAR':
             path, explored = get_ida_star_path(start, end, crowded, accessible_only, is_emergency)
+        elif algo == 'EXPECTIMAX':
+            path, explored = get_expectimax_path(start, end, crowded, accessible_only, is_emergency)
+        elif algo == 'ALPHABETA':
+            path, explored = get_alphabeta_path(start, end, crowded, accessible_only, is_emergency)
         else:  # Default: A*
             path, explored = get_astar_path(start, end, crowded, accessible_only, is_emergency)
 
@@ -949,6 +1160,13 @@ def find_path():
                     "f": round(f_val, 2)
                 })
 
+        
+        metrics = {
+            "runtime_ms": round((time.time() - start_time) * 1000, 2),
+            "nodes_expanded": len(explored) if explored else 0,
+            "peak_memory_kb": sys.getsizeof(explored) / 1024 if explored else 0
+        }
+
         directions = build_directions_for_path(path)
 
         return jsonify({
@@ -957,7 +1175,8 @@ def find_path():
             "explored": explored,
             "total_cost": total_cost,
             "directions": directions,
-            "f_g_h_values": f_g_h_values
+            "f_g_h_values": f_g_h_values,
+            "metrics": metrics
         })
 
     # For multiple persons, calculate independent paths for each person
@@ -979,7 +1198,11 @@ def find_path():
             path, explored = get_greedy_path(start, end, accessible_only)
         elif algo == 'IDASTAR':
             path, explored = get_ida_star_path(start, end, crowded, accessible_only, is_emergency)
-        else:
+        elif algo == 'EXPECTIMAX':
+            path, explored = get_expectimax_path(start, end, crowded, accessible_only, is_emergency)
+        elif algo == 'ALPHABETA':
+            path, explored = get_alphabeta_path(start, end, crowded, accessible_only, is_emergency)
+        else:  # Default: A*
             path, explored = get_astar_path(start, end, crowded, accessible_only, is_emergency)
             
         if path is None:
@@ -1023,6 +1246,61 @@ def find_path():
         "total_cost": max_cost,
         "explored": list(explored_all)
     })
+
+
+@app.route('/api/schedule', methods=['GET'])
+def schedule_doctors():
+    doctors = ["Dr_Smith", "Dr_Ross", "Dr_Blunt", "Dr_Thorne", "Dr_Chen", "Dr_Wilson", "Dr_Vance"]
+    shifts = ["Morning (8AM-1PM)", "Afternoon (1PM-6PM)", "Night (6PM-12AM)"]
+    rooms = ["Room A", "Room B", "Room C"]
+    
+    # Domain: each doctor needs a shift and a room
+    variables = doctors
+    domains = {d: [(s, r) for s in shifts for r in rooms] for d in doctors}
+    
+    algo = request.args.get('algo', 'minconflicts')
+    
+    if algo == 'minconflicts':
+        csp = MinConflictsCSP(variables, domains)
+        schedule = csp.solve()
+    else:
+        def constraint(var, value, assignment):
+            # Constraint 1: No two doctors in the same room at the same shift
+            for other_var, other_val in assignment.items():
+                if other_val == value:
+                    return False
+            return True
+            
+        csp = BacktrackingCSP(variables, domains, [constraint])
+        schedule = csp.backtrack()
+    
+    if schedule:
+        return jsonify({"success": True, "schedule": {d: {"shift": s, "room": r} for d, (s, r) in schedule.items()}})
+    return jsonify({"success": False, "error": "No valid schedule found"})
+
+@app.route('/api/track', methods=['POST'])
+def track_asset():
+    data = request.json
+    evidence = data.get("evidence") # e.g., "heard near Lift_1"
+    
+    def transition_model(state):
+        conns = HOSPITAL_MAP[state]["connections"]
+        if not conns:
+            return {state: 1.0}
+        prob = 1.0 / len(conns)
+        return {n: prob for n in conns}
+        
+    def sensor_model(state, ev):
+        if ev and ev.lower() in state.lower():
+            return 0.8
+        return 0.1
+        
+    tracker.predict(transition_model)
+    tracker.update(evidence, sensor_model)
+    
+    top_beliefs = sorted(tracker.belief.items(), key=lambda x: x[1], reverse=True)[:5]
+    return jsonify({"success": True, "top_locations": [{"node": k, "probability": round(v, 4)} for k, v in top_beliefs]})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5998, debug=True)

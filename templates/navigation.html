@@ -51,6 +51,8 @@
                 <option value="UCS">Uniform Cost Search (Optimal)</option>
                 <option value="BFS">Breadth-First Search (Fewest Hops)</option>
                 <option value="DFS">Depth-First Search (Experimental)</option>
+                <option value="EXPECTIMAX">Expectimax (Stochastic Wait Times)</option>
+                <option value="ALPHABETA">Alpha-Beta Pruning (Worst-Case Evacuation)</option>
             </select>
         </div>
 
@@ -80,6 +82,39 @@
             🚨 EMERGENCY: ROUTE TO ER
         </button>
 
+        
+        <!-- Tracker Panel -->
+        <div class="control-group" style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--glass-border);">
+            <label>📡 HMM Asset Tracker</label>
+            <input type="text" id="track-evidence" placeholder="e.g. Near Lift_1" class="search-input" style="margin-bottom:0.5rem;">
+            <button onclick="trackAsset()" class="hero-cta-secondary" style="width: 100%; font-size: 0.8rem;">Locate Wheelchair</button>
+            <div id="track-results" style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);"></div>
+        </div>
+        <script>
+            async function trackAsset() {
+                const evidence = document.getElementById('track-evidence').value;
+                document.getElementById('track-results').innerHTML = 'Tracking...';
+                try {
+                    const res = await fetch('/api/track', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({evidence})
+                    });
+                    const data = await res.json();
+                    if(data.success) {
+                        let html = '<ul style="padding-left:1rem; margin:0;">';
+                        data.top_locations.forEach(l => {
+                            html += `<li><b>${l.node.replace('_',' ')}</b>: ${(l.probability*100).toFixed(1)}%</li>`;
+                        });
+                        html += '</ul>';
+                        document.getElementById('track-results').innerHTML = html;
+                    }
+                } catch(err) {
+                    document.getElementById('track-results').innerHTML = 'Failed tracking.';
+                }
+            }
+        </script>
+
         <!-- Stats Panel -->
         <div id="stats-panel" class="stats-panel hidden" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: 20px;">
             <h3 style="font-size: 0.9rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 1rem;">Path Analysis</h3>
@@ -89,6 +124,8 @@
                 <div class="stat-item"><span>Steps</span><strong id="stat-steps">--</strong></div>
                 <div class="stat-item"><span>Nodes Explored</span><strong id="stat-explored">--</strong></div>
                 <div class="stat-item"><span>Algorithm</span><strong id="stat-algo">--</strong></div>
+                <div class="stat-item"><span>Runtime</span><strong id="stat-runtime" style="color: var(--staff-accent);">--</strong></div>
+                <div class="stat-item"><span>Peak Memory</span><strong id="stat-memory" style="color: var(--accent-orange);">--</strong></div>
             </div>
             <button id="show-directions-btn" class="hero-cta-secondary" style="width: 100%; margin-top: 1.5rem; font-size: 0.8rem; white-space: nowrap;">🗺️ Turn-by-Turn</button>
         </div>
