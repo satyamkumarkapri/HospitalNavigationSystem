@@ -8,14 +8,16 @@ The project is structured to satisfy rigorous Artificial Intelligence syllabus r
 
 ## Detailed Breakdown of AI Concepts
 
-### 1. Python Essentials, Data Structures & Empirical Profiling (CO1)
+### 1. Python Essentials, Data Structures & Rule-Based Expert Systems (CO1)
 The application leverages robust Python features to ensure type-safe, efficient AI algorithms.
+- **Rule-Based Expert System (Triage)**: Implemented a forward-chaining `MedicalTriageSystem` that uses explicit IF-THEN rules and set intersections to automatically diagnose patient symptoms (e.g., "chest pain" -> ER) and route them to the correct department.
+  - 🏥 **Hospital Use Case**: An automated triage chatbot at the front desk that instantly directs incoming patients to Neurology, Maternity, or the ER based on symptom keywords, saving critical nurse evaluation time.
 - **Advanced Python Constructs**: Built using modern `typing` (e.g., `Dict`, `List`, `Set`, `Optional`) and `dataclasses` to cleanly model graph nodes, edges, and state representations. 
 - **Core Data Structures**: Utilizes Python's native `heapq` to implement $O(\log n)$ priority queues for algorithms like A* and UCS, alongside `collections.deque` for fast BFS operations.
 - **Empirical Profiling**: Every pathfinding algorithm dynamically measures three critical metrics:
   - **Runtime ($ms$)**: Using high-precision `time.perf_counter()`.
   - **Space Complexity / Peak Memory ($KB$)**: By profiling the size of the frontier (priority queue) and the `explored` set dynamically during graph traversal.
-  - **Nodes Expanded**: Tracks how many states were popped from the frontier, illustrating the strict difference in efficiency between Blind Search (exploring thousands of nodes) and Heuristic Search (exploring very few).
+  - **Nodes Expanded**: Tracks how many states were popped from the frontier, illustrating the strict difference in efficiency between Blind Search and Heuristic Search.
 
 ### 2. Search Algorithms (Blind & Heuristic) (CO2)
 The Navigation module acts as the core pathfinding agent. The environment is fully observable, deterministic, static, and discrete.
@@ -33,36 +35,40 @@ These algorithms utilize an evaluation function $f(n) = g(n) + h(n)$ to guide th
   - **Admissibility**: The heuristic $h(n)$ (Euclidean/Manhattan distance) never overestimates the true walking distance.
   - **Consistency**: The heuristic satisfies the triangle inequality $h(n) \le c(n, a, n') + h(n')$, ensuring the $f$-costs are monotonically non-decreasing along any path.
 - **Greedy Best-First Search**: Highly aggressive, sorting the frontier strictly by $h(n)$. It dives straight toward the target room, completely ignoring the cost accumulated so far $g(n)$. Fast, but often yields sub-optimal paths.
-- **IDA* (Iterative Deepening A*)**: A memory-bounded variant of A*. Instead of storing the entire frontier in memory (which can cause memory leaks in massive graphs), IDA* uses standard DFS but cuts off branches where $f(n)$ exceeds a threshold. If it fails, the threshold is raised to the minimum excess cost observed, and the search restarts.
+- **IDA* (Iterative Deepening A*)**: A memory-bounded variant of A*. Uses standard DFS but cuts off branches where $f(n)$ exceeds a threshold.
+- **Implicit State Space Search**: An implementation of an implicit puzzle solver (8-puzzle style logic) to demonstrate searching dynamic configurations where states are generated on the fly rather than stored entirely in memory.
+  - 🏥 **Hospital Use Case**: Calculating the optimal sequence of moves to rearrange hospital beds or surgical equipment in a crowded ICU to extract a specific asset without colliding with life-support machines.
 
 ### 3. Constraint Satisfaction Problems (CSP) (CO3)
 Located in the **Staff Portal**, the Auto-Scheduler treats hospital staffing as a formal CSP.
 - **Variables**: Doctors / Staff members.
 - **Domains**: Cartesian product of available Shifts (e.g., Morning, Night) and Rooms (e.g., Room A, Room B).
 - **Constraints**: Hard constraints prevent assignments where multiple doctors are assigned to the exact same room on the exact same shift.
-- **Backtracking Engine**: The core solver recursively assigns domain values to variables. If a constraint is violated, it backtracks and tries the next value.
-- **MRV (Minimum Remaining Values)**: A variable-ordering heuristic. The solver first attempts to schedule the doctor who has the *fewest* valid shifts available. This fails fast and drastically prunes the search tree.
-- **LCV (Least Constraining Value)**: A value-ordering heuristic. When assigning a shift to a doctor, the solver chooses the shift/room combo that rules out the *fewest* choices for the remaining unscheduled doctors.
-- **Min-Conflicts Algorithm**: A local search solver that starts with a complete random assignment and iteratively reassigns conflicted variables to values that minimize the total number of constraint violations. This acts as a highly efficient alternative to standard backtracking.
+- **Backtracking Engine with Forward Checking**: The core solver recursively assigns domain values to variables. Crucially, it implements **Forward Checking** to dynamically prune the domains of unassigned doctors the moment a shift is claimed, allowing it to fail fast and exponentially speed up scheduling.
+- **MRV (Minimum Remaining Values)**: A variable-ordering heuristic. The solver first attempts to schedule the doctor who has the *fewest* valid shifts available.
+- **Explainability**: The CSP actively tracks constraint failures and generates human-readable reasoning strings (e.g., *"Cannot assign Dr. Smith to Room A because Dr. Jones is already booked there"*).
+- **Min-Conflicts Algorithm**: A local search solver that starts with a complete random assignment and iteratively reassigns conflicted variables to values that minimize the total number of constraint violations.
+  - 🏥 **Hospital Use Case**: The Automated Staff Portal generates 100% conflict-free weekly schedules for doctors, ensuring no two surgeons are booked for the exact same operating theater at the same time, while providing clear HR explanations if a schedule request is mathematically impossible.
 
 ### 4. Adversarial & Stochastic Search (CO4)
 The hospital environment involves both multi-agent interactions and non-deterministic events.
 - **Minimax Algorithm**: Used for Multi-Person Routing. When multiple people (up to 6) need to meet, the system treats it as an adversarial minimization problem. It finds a central meeting point that minimizes the maximum travel cost of any individual, ensuring fairness.
 - **Alpha-Beta Pruning (Worst-Case Evacuation Simulator)**: Simulates a 2-player game where an "Adversary" (e.g. fire/hazard) introduces dynamic delays to maximize escape time. The algorithm efficiently prunes mathematically inferior paths to find the safest evacuation route.
-- **Expectimax Algorithm**: When the `Expectimax` search option is enabled, the agent models the environment as a game against nature.
-- **Tree Structure**: 
-  - **Max Nodes**: The pathfinding agent choosing which corridor to take.
-  - **Chance Nodes**: The environment dictating the travel delay based on a probability distribution.
-- **Expected Utility**: Rather than calculating absolute distance, Expectimax calculates $V = \sum P(\text{outcome}) \times U(\text{outcome})$. For example, an elevator might have a 70% chance of being fast (delay=2) and 30% chance of being stuck (delay=20). Expectimax will dynamically weigh this expected cost ($7.4$) against the deterministic cost of taking the stairs ($10$), choosing the elevator despite the risk.
+- **Markov Decision Process (MDP) & Policy Selection**: Uses **Value Iteration** to generate an optimal mathematical Policy mapping every single room in the hospital to the best possible action, completely solving the environment under stochastic uncertainty (e.g., elevators randomly breaking).
+- **Expectimax Algorithm**: When the `Expectimax` search option is enabled, the agent models the environment as a game against nature. Expectimax dynamically weighs the expected utility of probabilistic travel delays against deterministic costs.
+  - 🏥 **Hospital Use Case (Stochastic Routing)**: Choosing whether a paramedic should take an elevator (which has a 20% chance of being broken/slow) versus taking the stairs (which is a guaranteed, but slower, deterministic cost).
+  - 🏥 **Hospital Use Case (Minimax Evacuation)**: Coordinating a multi-ward emergency evacuation where 6 different patient groups must meet at a central triage point, ensuring nobody is left waiting significantly longer than anyone else.
 
-### 5. Probabilistic Reasoning & Hidden Markov Models (CO5 & CO6)
-Located in the Navigation sidebar under **HMM Asset Tracker**. Used to track moving assets (like expensive medical equipment or patients) when GPS is unavailable indoors and we rely on noisy sensor reports.
-- **Markov Property**: The assumption that the asset's next location depends *only* on its current location, independent of its historical path.
-- **Transition Model ($P(X_t | X_{t-1})$)**: The probability matrix dictating how the asset moves. Modeled mathematically based on the exact edge connections of the `HOSPITAL_MAP` graph (e.g., an asset in a room with 4 doors has a 25% chance of moving through any given door).
-- **Sensor/Emission Model ($P(e_t | X_t)$)**: The probability of receiving a specific noisy sensor reading (e.g., a nurse typing "I saw it near the Elevator") given the asset's true state.
-- **Forward Algorithm (Filtering)**: The system dynamically tracks the *Belief State* (a probability distribution over all rooms). When evidence is provided, it calculates $P(X_t | e_{1:t}) = \alpha P(e_t | X_t) \sum P(X_t | X_{t-1}) P(X_{t-1} | e_{1:t-1})$ to output the top 5 most mathematically probable locations of the asset.
-
----
+### 5. Probabilistic Reasoning & Hybrid Architectures (CO5 & CO6)
+The project combines multiple disparate AI subfields into a single integrated system.
+- **Bayesian Networks & Inference**: Implemented an AI Diagnostic tool utilizing a Bayesian Network with Conditional Probability Tables (CPTs). Calculates exact posterior probabilities of specific diseases given explicit symptom evidence.
+  - 🏥 **Hospital Use Case**: A clinical decision-support tool for doctors that calculates the exact percentage probability of a patient having COVID vs the Flu given symptoms like "loss of taste" and "fever".
+- **Hidden Markov Models (HMM Tracker)**: Used to track moving assets when GPS is unavailable. Utilizes a discrete **Transition Model** ($P(X_t | X_{t-1})$) and **Sensor Model** to calculate the *Belief State* via the Forward Algorithm (Filtering).
+  - 🏥 **Hospital Use Case**: Tracking a stolen or lost $50,000 portable defibrillator using only noisy, unconfirmed reports from staff ("I think I heard it near the East Wing").
+- **True Hybrid Architecture**: The system natively connects its probabilistic and search layers. The core A* Pathfinding agent constantly queries the HMM Tracker; if an asset is mathematically highly probable to be blocking a corridor, the pathfinding agent dynamically increases edge weights to automatically route around the probabilistic obstacle.
+  - 🏥 **Hospital Use Case**: A smart wheelchair automatically re-routing a patient down a longer hallway because the HMM engine predicts an 80% chance that a janitor's cart is currently blocking the primary route.
+- **Explainable Reasoning Traces**: The pathfinding algorithms actively log their internal mathematical decisions (e.g., node expansions, pruned paths, heuristic evaluations), passing this "thought process" back to the frontend for transparent AI reasoning.
+- **Ethics & Limitations (Bias & Miscalibration)**: The system inherently explores technical limitations. A poorly designed heuristic (e.g., ignoring wheelchair accessible restrictions) introduces algorithmic bias against physically disabled patients. Furthermore, if the HMM Sensor Model is overconfident (uncertainty miscalibration), the system might falsely lock down a hallway assuming a hazard is present when it isn't, demonstrating the critical need for safe, calibrated AI in healthcare.
 
 ## Setup & Installation
 
@@ -88,6 +94,18 @@ Located in the Navigation sidebar under **HMM Asset Tracker**. Used to track mov
    ```bash
    python3 -m unittest test_algorithms.py
    ```
+
+## API Endpoint Documentation
+
+The AI features are exposed through a series of RESTful JSON APIs available in `app.py`:
+
+- **`POST /api/triage`**: Rule-Based Expert System endpoint. Provide an array of `symptoms` and it uses forward-chaining rules to recommend a department.
+- **`POST /api/diagnose`**: Bayesian Inference endpoint. Given symptom `evidence`, calculates the exact posterior probability distribution of diseases using Conditional Probability Tables.
+- **`POST /api/solve_puzzle`**: Implicit state-space puzzle solver utilizing recursive logic to find minimum-move sequences dynamically.
+- **`POST /api/get_policy`**: Runs the Value Iteration algorithm (MDP) to calculate an optimal directional policy across every hospital node for a given destination.
+- **`POST /api/track`**: Hidden Markov Model filtering endpoint. Accepts a sensor reading `evidence` string and updates the belief state distribution of a moving asset.
+- **`GET /api/schedule`**: Solves the Doctor Scheduling Constraint Satisfaction Problem. Accepts an `algo` parameter (e.g. `minconflicts` or `backtracking`). Returns the conflict-free schedule and explainable reasoning traces.
+- **`POST /api/route`**: The core Pathfinding API. Takes start/end nodes, algorithm selection, and dynamic constraints (wheelchair access, crowds). Returns the optimal path, computational metrics (Runtime, Peak Memory, Nodes Expanded), and exact reasoning trace logs.
 
 ## User Interface Highlights
 - **Interactive SVG Map**: Full pan, zoom, and tilt (3D) capable SVG map with detailed node information and real-time path drawing.
@@ -124,3 +142,13 @@ These are the HTML files rendered by Flask using Jinja2 templating.
 ### Static Assets (`/static`)
 - **`static/js/script.js`**: The core frontend JavaScript. Responsible for rendering the interactive SVG graph, dynamically animating the pathfinding routes (drawing lines between nodes), rendering multi-person simultaneous paths, and parsing the metric data (Runtime/Memory) returned by `app.py`.
 - **`static/css/style.css`**: Contains all visual styling, utilizing CSS variables, glassmorphism design, custom animations, and responsive layouts to ensure the application feels exceptionally premium.
+
+---
+
+## Connect with Me
+
+- **GitHub**: [satyamkumarkapri](https://github.com/satyamkumarkapri)
+- **LinkedIn**: [satyamkumarkapri](https://www.linkedin.com/in/satyamkumarkapri)
+- **Twitter**: [@satyam_kapri](https://twitter.com/satyam_kapri)
+- **Instagram**: [btw_its._satyam](https://www.instagram.com/btw_its._satyam?igsh=c2VmYmN2MHBnemVq)
+- **Facebook**: [Satyam Kumar Kapri](https://www.facebook.com/share/1DWHFm4rNs/)

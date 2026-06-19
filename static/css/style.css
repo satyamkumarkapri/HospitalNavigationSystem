@@ -526,6 +526,12 @@ body.light-theme .weight-label {
     color: #f8fafc;
 }
 
+body.light-theme .stats-panel, body.light-theme .details-panel {
+    color: var(--text-primary);
+    background: rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
 .stats-panel.hidden, .details-panel.hidden { display: none !important; }
 
 .stat-item {

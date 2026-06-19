@@ -529,6 +529,13 @@ def get_advanced_weight(prev_node, node, neighbor, base_weight, crowded_paths, i
     if pair in crowded_paths or (neighbor, node) in crowded_paths:
         weight += 20
         
+    # Hybrid Architecture: HMM Uncertainty Penalty
+    tracker = globals().get('tracker')
+    if tracker and neighbor in tracker.belief:
+        hmm_prob = tracker.belief[neighbor]
+        if hmm_prob > 0.1: # If an asset is highly likely here, avoid it
+            weight += (hmm_prob * 100)
+            
     # Elevator wait penalty (entering a lift from a non-lift)
     if "Lift" not in node and "Lift" in neighbor:
         weight += 50
@@ -605,17 +612,22 @@ def get_ucs_path(start, end, crowded_paths=[], accessible_only=False, is_emergen
 
 def get_astar_path(start, end, crowded_paths=[], accessible_only=False, is_emergency=False):
     tie = 0
-    pq = [(heuristic(start, end), 0, tie, start, [start])]
+    pq = [(heuristic(start, end), 0, tie, start, [start], [])]
     visited = {}
     explored_order = []
+    
     while pq:
-        (f, g, _, node, path) = heapq.heappop(pq)
+        (f, g, _, node, path, traces) = heapq.heappop(pq)
+        
         if node in visited and visited[node] <= g:
             continue
+            
         visited[node] = g
         explored_order.append(node)
+        
         if node == end:
-            return path, explored_order
+            return path, explored_order, traces
+            
         for neighbor, weight in HOSPITAL_MAP[node]["connections"].items():
             if neighbor not in HOSPITAL_MAP:
                 continue
@@ -626,10 +638,19 @@ def get_astar_path(start, end, crowded_paths=[], accessible_only=False, is_emerg
             actual_weight = get_advanced_weight(prev_node, node, neighbor, weight, crowded_paths, is_emergency)
             
             new_g = g + actual_weight
-            new_f = new_g + heuristic(neighbor, end)
+            h_val = heuristic(neighbor, end)
+            new_f = new_g + h_val
+            
+            # Explainable Trace Logic
+            new_traces = list(traces)
+            if len(new_traces) < 20: # keep the trace log bounded
+                new_traces.append(f"Explored {node} -> {neighbor}. Cost: {round(new_g, 1)}, Heuristic: {round(h_val, 1)}")
+            elif len(new_traces) == 20:
+                new_traces.append("... trace log truncated ...")
+                
             tie += 1
-            heapq.heappush(pq, (new_f, new_g, tie, neighbor, path + [neighbor]))
-    return None, explored_order
+            heapq.heappush(pq, (new_f, new_g, tie, neighbor, path + [neighbor], new_traces))
+    return None, explored_order, []
 
 def get_greedy_path(start, end, accessible_only=False):
     pq = [(heuristic(start, end), start, [start])]
@@ -927,10 +948,13 @@ class BacktrackingCSP:
         self.variables = variables
         self.domains = domains
         self.constraints = constraints
+        self.failures = [] # Explainability: track constraint failures
 
     def is_consistent(self, var, value, assignment):
         for constraint in self.constraints:
-            if not constraint(var, value, assignment):
+            valid, reason = constraint(var, value, assignment)
+            if not valid:
+                self.failures.append(reason)
                 return False
         return True
 
@@ -938,16 +962,43 @@ class BacktrackingCSP:
         unassigned = [v for v in self.variables if v not in assignment]
         return min(unassigned, key=lambda v: len(self.domains[v]))
 
-    def backtrack(self, assignment={}):
+    def forward_check(self, var, value, assignment):
+        pruned = {v: list(self.domains[v]) for v in self.variables if v not in assignment}
+        for unassigned_var in pruned:
+            for unassigned_val in list(pruned[unassigned_var]):
+                test_assign = assignment.copy()
+                test_assign[var] = value
+                valid = True
+                for constraint in self.constraints:
+                    is_valid, _ = constraint(unassigned_var, unassigned_val, test_assign)
+                    if not is_valid:
+                        valid = False
+                        break
+                if not valid:
+                    pruned[unassigned_var].remove(unassigned_val)
+            if len(pruned[unassigned_var]) == 0:
+                return None # Domain wiped out
+        return pruned
+
+    def backtrack(self, assignment=None, current_domains=None):
+        if assignment is None: assignment = {}
+        if current_domains is None: current_domains = self.domains
+            
         if len(assignment) == len(self.variables):
             return assignment
+            
         var = self.mrv(assignment)
-        for value in self.domains[var]:
+        for value in current_domains[var]:
             if self.is_consistent(var, value, assignment):
                 assignment[var] = value
-                result = self.backtrack(assignment)
-                if result:
-                    return result
+                # Forward checking
+                new_domains = self.forward_check(var, value, assignment)
+                if new_domains is not None:
+                    merged = current_domains.copy()
+                    merged.update(new_domains)
+                    result = self.backtrack(assignment, merged)
+                    if result:
+                        return result
                 del assignment[var]
         return None
 
@@ -1023,6 +1074,87 @@ class HMMTracker:
                 self.belief[s] /= total
 
 tracker = HMMTracker(list(HOSPITAL_MAP.keys()))
+
+# Medical Triage System (Rule-Based Expert System)
+class MedicalTriageSystem:
+    def __init__(self):
+        self.rules = [
+            ({"chest pain", "shortness of breath", "heart palpitations", "heart attack"}, "ER", "Critical cardiac symptoms detected. Proceed to Emergency Room immediately."),
+            ({"severe bleeding", "trauma", "unconsciousness", "accident"}, "ER", "Critical trauma symptoms detected. Proceed to Emergency Room immediately."),
+            ({"fever", "cough", "sore throat", "flu"}, "Outpatient", "Standard flu-like symptoms. Please visit the Outpatient Clinic."),
+            ({"skin rash", "itch", "acne", "burn"}, "Dermatology", "Skin condition detected. Please visit Dermatology."),
+            ({"joint pain", "fracture", "sprain", "broken bone"}, "Orthopedics", "Bone or joint issue detected. Please visit Orthopedics."),
+            ({"headache", "dizziness", "seizure", "migraine"}, "Neurology", "Neurological symptoms detected. Please visit Neurology."),
+            ({"pregnancy", "contractions", "water broke"}, "Maternity", "Maternity symptoms detected. Please visit the Maternity Ward."),
+            ({"cancer", "tumor", "chemo", "lump"}, "Oncology", "Oncology symptoms detected. Please visit the Oncology Center.")
+        ]
+    
+    def diagnose(self, symptoms):
+        symptom_set = set([s.lower() for s in symptoms])
+        for rule_symptoms, dept, message in self.rules:
+            if len(rule_symptoms.intersection(symptom_set)) > 0:
+                return dept, message
+        return "Reception", "Symptoms unclear. Please visit Reception for further triage."
+
+# Bayesian Network
+class BayesianNetwork:
+    def __init__(self):
+        self.prior = {"Flu": 0.1, "COVID": 0.05, "Stress": 0.2}
+        self.cpt = {
+            "Flu": {"Fever": 0.8, "Cough": 0.7, "Fatigue": 0.9},
+            "COVID": {"Fever": 0.85, "Cough": 0.9, "Fatigue": 0.8, "LossOfTaste": 0.7},
+            "Stress": {"Fever": 0.05, "Cough": 0.01, "Fatigue": 0.8, "Headache": 0.9}
+        }
+        
+    def diagnose(self, evidence_symptoms):
+        results = {}
+        for disease, p_disease in self.prior.items():
+            prob = p_disease
+            for symptom in evidence_symptoms:
+                p_s_given_d = self.cpt[disease].get(symptom, 0.1)
+                prob *= p_s_given_d
+            results[disease] = prob
+        total = sum(results.values())
+        if total > 0:
+            for k in results:
+                results[k] = round((results[k] / total) * 100, 2)
+        return results
+
+# MDP / Value Iteration
+def value_iteration(destination, gamma=0.9, epsilon=0.01):
+    V = {node: 0.0 for node in HOSPITAL_MAP}
+    policy = {node: None for node in HOSPITAL_MAP}
+    
+    while True:
+        delta = 0
+        for state in HOSPITAL_MAP:
+            if state == destination:
+                V[state] = 100.0
+                continue
+            
+            v = V[state]
+            max_val = float('-inf')
+            best_action = None
+            
+            for action, weight in HOSPITAL_MAP[state]["connections"].items():
+                if action not in HOSPITAL_MAP: continue
+                # Stochastic transition: 80% success, 20% stay in same state
+                expected_val = 0.8 * (V[action] - weight) + 0.2 * (V[state] - weight)
+                if expected_val > max_val:
+                    max_val = expected_val
+                    best_action = action
+            
+            if max_val != float('-inf'):
+                V[state] = max_val
+                policy[state] = best_action
+                
+            delta = max(delta, abs(v - V[state]))
+            
+        if delta < epsilon:
+            break
+            
+    return policy, V
+
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
 @app.route('/')
@@ -1131,8 +1263,7 @@ def find_path():
         elif algo == 'ALPHABETA':
             path, explored = get_alphabeta_path(start, end, crowded, accessible_only, is_emergency)
         else:  # Default: A*
-            path, explored = get_astar_path(start, end, crowded, accessible_only, is_emergency)
-
+            path, explored, traces = get_astar_path(start, end, crowded, accessible_only, is_emergency)
         if path is None:
             return jsonify({"error": "No path found. Try disabling wheelchair filter or check if nodes are connected."}), 404
 
@@ -1176,7 +1307,8 @@ def find_path():
             "total_cost": total_cost,
             "directions": directions,
             "f_g_h_values": f_g_h_values,
-            "metrics": metrics
+            "metrics": metrics,
+            "reasoning_traces": traces if algo == 'A*' or algo not in ['BFS', 'DFS', 'UCS', 'GREEDY', 'IDASTAR', 'EXPECTIMAX', 'ALPHABETA'] else []
         })
 
     # For multiple persons, calculate independent paths for each person
@@ -1203,7 +1335,7 @@ def find_path():
         elif algo == 'ALPHABETA':
             path, explored = get_alphabeta_path(start, end, crowded, accessible_only, is_emergency)
         else:  # Default: A*
-            path, explored = get_astar_path(start, end, crowded, accessible_only, is_emergency)
+            path, explored, traces = get_astar_path(start, end, crowded, accessible_only, is_emergency)
             
         if path is None:
             return jsonify({"error": f"No path found for Person {idx+1}. Please check constraints."}), 404
@@ -1244,15 +1376,24 @@ def find_path():
         "meeting_point_info": { "name": "", "icon": "", "floor": 0 },
         "persons_data": persons_data,
         "total_cost": max_cost,
-        "explored": list(explored_all)
+        "explored": list(explored_all),
+        "reasoning_traces": traces if 'traces' in locals() else []
     })
 
 
 @app.route('/api/schedule', methods=['GET'])
 def schedule_doctors():
-    doctors = ["Dr_Smith", "Dr_Ross", "Dr_Blunt", "Dr_Thorne", "Dr_Chen", "Dr_Wilson", "Dr_Vance"]
+    doctors = [
+        "Dr. Alexander Smith", "Dr. Elena Vance", "Dr. Sarah Jones", 
+        "Dr. Marcus Thorne", "Dr. Sarah Chen", "Dr. James Wilson", 
+        "Dr. Emily Blunt", "Dr. Michael Ross"
+    ]
     shifts = ["Morning (8AM-1PM)", "Afternoon (1PM-6PM)", "Night (6PM-12AM)"]
-    rooms = ["Room A", "Room B", "Room C"]
+    rooms = [
+        "Floor 2, Room 300", "Floor 2, Room 402", "Floor 1, Room 500", 
+        "Floor 1, Room 210", "Floor 3, Room 850", "Floor 3, Room 150", 
+        "Floor 1, Room 1200", "Ground Floor, Room 1200"
+    ]
     
     # Domain: each doctor needs a shift and a room
     variables = doctors
@@ -1265,18 +1406,20 @@ def schedule_doctors():
         schedule = csp.solve()
     else:
         def constraint(var, value, assignment):
-            # Constraint 1: No two doctors in the same room at the same shift
             for other_var, other_val in assignment.items():
                 if other_val == value:
-                    return False
-            return True
+                    reason = f"Cannot assign {var} to {value[0]} in {value[1]} because {other_var} is already booked there."
+                    return False, reason
+            return True, ""
             
         csp = BacktrackingCSP(variables, domains, [constraint])
         schedule = csp.backtrack()
     
     if schedule:
         return jsonify({"success": True, "schedule": {d: {"shift": s, "room": r} for d, (s, r) in schedule.items()}})
-    return jsonify({"success": False, "error": "No valid schedule found"})
+        
+    reasons = list(set(csp.failures[-5:])) if hasattr(csp, 'failures') and csp.failures else ["Constraints could not be satisfied."]
+    return jsonify({"success": False, "error": "No valid schedule found", "reasons": reasons})
 
 @app.route('/api/track', methods=['POST'])
 def track_asset():
@@ -1301,6 +1444,68 @@ def track_asset():
     top_beliefs = sorted(tracker.belief.items(), key=lambda x: x[1], reverse=True)[:5]
     return jsonify({"success": True, "top_locations": [{"node": k, "probability": round(v, 4)} for k, v in top_beliefs]})
 
+# Implicit State Space Search (8-puzzle logic)
+def solve_8_puzzle(start_state_tuple):
+    goal_state = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+    queue = deque([(start_state_tuple, [])])
+    visited = set()
+    
+    while queue:
+        state, path = queue.popleft()
+        if state == goal_state:
+            return path
+        
+        if state in visited: continue
+        visited.add(state)
+        
+        if len(visited) > 50000: return None # safeguard against timeouts
+        
+        zero_idx = state.index(0)
+        x, y = zero_idx % 3, zero_idx // 3
+        
+        for dx, dy, move in [(-1, 0, 'Left'), (1, 0, 'Right'), (0, -1, 'Up'), (0, 1, 'Down')]:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < 3 and 0 <= ny < 3:
+                new_idx = ny * 3 + nx
+                new_state = list(state)
+                new_state[zero_idx], new_state[new_idx] = new_state[new_idx], new_state[zero_idx]
+                queue.append((tuple(new_state), path + [move]))
+    return None
+
+@app.route('/api/triage', methods=['POST'])
+def triage():
+    data = request.json
+    symptoms = data.get('symptoms', [])
+    triage_sys = MedicalTriageSystem()
+    dept, message = triage_sys.diagnose(symptoms)
+    return jsonify({"department": dept, "message": message})
+
+@app.route('/api/diagnose', methods=['POST'])
+def diagnose():
+    data = request.json
+    symptoms = data.get('symptoms', [])
+    bn = BayesianNetwork()
+    results = bn.diagnose(symptoms)
+    return jsonify({"success": True, "probabilities": results})
+
+@app.route('/api/get_policy', methods=['POST'])
+def get_policy():
+    data = request.json
+    destination = data.get('destination')
+    if destination not in HOSPITAL_MAP:
+        return jsonify({"success": False, "error": "Invalid destination"})
+    
+    policy, V = value_iteration(destination)
+    return jsonify({"success": True, "policy": policy})
+
+@app.route('/api/solve_puzzle', methods=['POST'])
+def solve_puzzle():
+    data = request.json
+    start_state = data.get('state', [1,2,3,4,5,6,7,0,8]) # list of 9 ints
+    path = solve_8_puzzle(tuple(start_state))
+    if path is not None:
+        return jsonify({"success": True, "path": path})
+    return jsonify({"success": False, "error": "Unsolvable or took too long"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5998, debug=True)

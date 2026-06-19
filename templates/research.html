@@ -63,6 +63,54 @@
 
         </div>
 
+        <!-- BAYESIAN TRIAGE WIDGET -->
+        <div class="reveal" style="margin-top: 4rem;">
+            <div style="background: var(--sidebar-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 3rem; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 0; right: 0; width: 300px; height: 300px; background: radial-gradient(circle, rgba(167, 139, 250, 0.1) 0%, transparent 70%); pointer-events: none;"></div>
+                
+                <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 15px;">
+                    <span style="font-size: 2.5rem;">🧬</span> Bayesian Diagnostic Engine
+                </h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem; max-width: 600px; line-height: 1.6;">
+                    Select patient symptoms to run exact mathematical inference through the hospital's Bayesian Network. This calculates the posterior probability of specific diseases given the observed evidence.
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem;">
+                    <!-- Input -->
+                    <div>
+                        <h4 style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 1rem; letter-spacing: 1px;">Observed Evidence (Symptoms)</h4>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;" id="symptoms-form">
+                            <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; background: var(--bg-dark); padding: 1rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                                <input type="checkbox" value="Fever" style="width: 20px; height: 20px; accent-color: #a78bfa;">
+                                <span style="font-size: 1.1rem; color: var(--text-primary);">Fever</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; background: var(--bg-dark); padding: 1rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                                <input type="checkbox" value="Cough" style="width: 20px; height: 20px; accent-color: #a78bfa;">
+                                <span style="font-size: 1.1rem; color: var(--text-primary);">Persistent Cough</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; background: var(--bg-dark); padding: 1rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                                <input type="checkbox" value="Fatigue" style="width: 20px; height: 20px; accent-color: #a78bfa;">
+                                <span style="font-size: 1.1rem; color: var(--text-primary);">Severe Fatigue</span>
+                            </label>
+                        </div>
+                        <button onclick="runDiagnostics()" class="primary-btn" style="margin-top: 1.5rem; width: 100%; padding: 1.2rem; border-radius: 12px; font-size: 1.1rem; font-weight: 700;">
+                            Run Exact Inference
+                        </button>
+                    </div>
+
+                    <!-- Output -->
+                    <div style="background: var(--bg-dark); border-radius: 16px; padding: 2rem; border: 1px solid var(--glass-border); display: flex; flex-direction: column;">
+                        <h4 style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 1.5rem; letter-spacing: 1px;">Posterior Probability Distribution</h4>
+                        
+                        <div id="diag-results" style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-secondary); text-align: center;">
+                            <span style="font-size: 40px; margin-bottom: 1rem; opacity: 0.5;">📊</span>
+                            Select symptoms and run inference to see probability distributions.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- CURRENT TRIALS -->
         <div class="reveal" style="margin-top: 6rem;">
             <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.5)); border: 1px solid var(--glass-border); border-radius: 30px; padding: 4rem;">
@@ -167,6 +215,54 @@
         if (event.target.className === 'modal-overlay') {
             event.target.style.display = 'none';
             document.body.style.overflow = 'auto';
+        }
+    }
+
+    async function runDiagnostics() {
+        const checkboxes = document.querySelectorAll('#symptoms-form input[type="checkbox"]:checked');
+        const symptoms = Array.from(checkboxes).map(cb => cb.value);
+        
+        const resDiv = document.getElementById('diag-results');
+        resDiv.innerHTML = '<div style="color: #a78bfa;">Running Bayesian calculations...</div>';
+        
+        try {
+            const response = await fetch('/api/diagnose', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ symptoms })
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                let html = '<div style="width: 100%; display: flex; flex-direction: column; gap: 1rem;">';
+                const diseases = Object.keys(data.probabilities);
+                
+                // Sort by probability
+                diseases.sort((a, b) => data.probabilities[b] - data.probabilities[a]);
+                
+                diseases.forEach(disease => {
+                    const prob = data.probabilities[disease].toFixed(1);
+                    const color = prob > 50 ? '#ef4444' : (prob > 20 ? '#f59e0b' : '#10b981');
+                    
+                    html += `
+                        <div style="text-align: left;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--text-primary); font-weight: 600;">
+                                <span>${disease}</span>
+                                <span style="color: ${color};">${prob}%</span>
+                            </div>
+                            <div style="width: 100%; background: var(--glass-border); border-radius: 50px; height: 10px; overflow: hidden;">
+                                <div style="width: ${prob}%; height: 100%; background: ${color}; transition: width 1s ease-out;"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                resDiv.innerHTML = html;
+            } else {
+                resDiv.innerHTML = '<div style="color: #ef4444;">Inference failed.</div>';
+            }
+        } catch (err) {
+            resDiv.innerHTML = '<div style="color: #ef4444;">System error.</div>';
         }
     }
 </script>
